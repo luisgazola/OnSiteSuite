@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.1 — Identificação do equipamento na abertura
+
+- Painel inicial no terminal com autoria da Excelsior Soluções e crédito a Luís Gazola.
+- Identificação local de SO, número de série, Service Tag, marca, modelo, tipo, CPU, RAM e discos.
+- Classificação Desktop/Notebook/AIO via chassis do firmware; sem inventar informações ausentes.
+- Novos comandos `--info` / `--show-info` no Linux e `-InfoOnly` / `-ShowInfo` no Windows.
+- Inventário persistido nos três formatos de relatório e campo JSON `equipamento` (schema 2.0 compatível).
+- Testes automatizados Linux ampliados; adaptador PowerShell requer homologação Windows.
+- Publicação orientada para nova tag `v2.0.1`, preservando `v2.0.0` e histórico anterior.
+
+
 ## 2.0.0 — Consolidação OnSiteSuite
 
 - Incorporado o código do FieldServiceSuite/FieldServiceToolkit 1.2.0 enviado pelo usuário.

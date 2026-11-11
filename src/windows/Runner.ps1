@@ -1,4 +1,4 @@
-# OnSiteSuite 2.0.0 — Windows adapter. PowerShell 7.6.9 recommended.
+# OnSiteSuite 2.0.1 — Windows adapter. PowerShell 7.6.9 recommended.
 # Tests are read-only, there is no automatic elevation, repair, reboot or network call.
 
 function New-OnsWindowsResult {
@@ -147,15 +147,22 @@ function Invoke-OnsWindowsProbe {
 
 function Start-OnsWindows {
  param([string]$RootPath,[string]$Tests,[bool]$All,[bool]$ListTests,[bool]$Online,
-       [string]$Client,[string]$Ticket,[string]$Technician,[string]$Serial,[string]$Symptom,[string]$Output,[bool]$NonInteractive)
+       [string]$Client,[string]$Ticket,[string]$Technician,[string]$Serial,[string]$Symptom,[string]$Output,[bool]$NonInteractive,[bool]$InfoOnly,[bool]$ShowInfo)
  $catalog=(Get-Content -Raw -Encoding UTF8 (Join-Path $RootPath 'config/tests.json') | ConvertFrom-Json).tests
  if ($ListTests) { $catalog | Format-Table id,title,kind -AutoSize; return }
+ . (Join-Path $RootPath 'src/windows/Equipment.ps1')
+ $version=(Get-Content -Raw (Join-Path $RootPath 'VERSION')).Trim()
+ $equipment=Get-OnsEquipmentInfo
+ if ($InfoOnly -or $ShowInfo -or (-not $NonInteractive -and -not $All -and [string]::IsNullOrWhiteSpace($Tests))) {
+  Show-OnsEquipmentInfo -Info $equipment -Version $version
+ }
+ if ($InfoOnly) { return }
  if ($All) { $Tests=(@($catalog | Where-Object {$_.kind -eq 'read-only'} | ForEach-Object {$_.id}) -join ',') }
  if ([string]::IsNullOrWhiteSpace($Tests) -and -not $NonInteractive) {
   $chosen=New-Object System.Collections.Generic.List[string]
   foreach ($t in @($catalog | Where-Object {$_.kind -eq 'read-only'})) { $chosen.Add($t.id) }
   while ($true) {
-   Write-Host "`n=== OnSiteSuite v2.0.0 — Seleção de testes ===" -ForegroundColor Cyan
+   Write-Host "`n--- MENU DE TESTES | OnSiteSuite v2.0.1 ---" -ForegroundColor Cyan
    for ($i=0;$i -lt $catalog.Count;$i++) {
     $t=$catalog[$i]; $x=if ($chosen.Contains($t.id)) {'x'} else {' '}
     Write-Host ('{0,2}. [{1}] {2}' -f ($i+1),$x,$t.title)
@@ -192,7 +199,7 @@ function Start-OnsWindows {
  $version=(Get-Content -Raw (Join-Path $RootPath 'VERSION')).Trim()
  $payload=[ordered]@{
   schemaVersion='2.0';product='OnSiteSuite';version=$version;createdAt=$stamp.ToString('yyyy-MM-ddTHH:mm:ssZ')
-  platform='windows';host=$env:COMPUTERNAME;onlineChecksAuthorized=$Online
+  platform='windows';host=$env:COMPUTERNAME;equipamento=$equipment;onlineChecksAuthorized=$Online
   atendimento=[ordered]@{cliente=$Client;chamado=$Ticket;tecnico=$Technician;serial=$Serial}
   tests=@($results)
   summary=[ordered]@{
@@ -208,6 +215,10 @@ function Start-OnsWindows {
  $payload | ConvertTo-Json -Depth 15 | Set-Content -LiteralPath $jsonPath -Encoding UTF8
  $lines=New-Object System.Collections.Generic.List[string]
  $lines.Add("OnSiteSuite $version — Laudo $($payload.createdAt)")
+ $lines.Add("Excelsior Soluções em Tecnologia | Identificação do equipamento")
+ $lines.Add("SO: $($equipment.sistemaOperacional) | Marca: $($equipment.marca) | Modelo: $($equipment.modelo)")
+ $lines.Add("Número de série: $($equipment.numeroSerie) | Service Tag: $($equipment.serviceTag) | Tipo: $($equipment.tipo)")
+ $lines.Add("CPU: $($equipment.processador) | RAM: $($equipment.memoria) | Armazenamento: $($equipment.armazenamento)")
  $lines.Add("Cliente: $Client | Chamado: $Ticket | Técnico: $Technician")
  foreach ($item in $results) {
   $lines.Add("`n[$($item.status)] $($item.title)")
@@ -219,7 +230,7 @@ function Start-OnsWindows {
  $style='body{font-family:system-ui,Arial;margin:30px;max-width:1100px;background:#111827;color:#e5e7eb}section,header{background:#1e293b;border:1px solid #475569;border-radius:12px;padding:18px;margin-bottom:14px;overflow-wrap:anywhere}pre{white-space:pre-wrap;word-break:break-word}.OK{color:#86efac}.ATENCAO{color:#fde68a}.INCONCLUSIVO,.NAO_SUPORTADO{color:#cbd5e1}.FALHA{color:#fca5a5}@media print{body,section,header{background:white;color:black}}'
  $html=New-Object System.Collections.Generic.List[string]
  $html.Add('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OnSiteSuite</title><style>'+$style+'</style></head><body>')
- $html.Add('<header><h1>OnSiteSuite v'+(Convert-OnsHtml $version)+'</h1><p>Data UTC: '+(Convert-OnsHtml $payload.createdAt)+'</p><p>Cliente: '+(Convert-OnsHtml $Client)+' · Chamado: '+(Convert-OnsHtml $Ticket)+' · Técnico: '+(Convert-OnsHtml $Technician)+'</p></header>')
+ $html.Add('<header><h1>OnSiteSuite v'+(Convert-OnsHtml $version)+'</h1><p>Excelsior Soluções em Tecnologia · Data UTC: '+(Convert-OnsHtml $payload.createdAt)+'</p><p>Sistema: '+(Convert-OnsHtml $equipment.sistemaOperacional)+' · Marca/Modelo: '+(Convert-OnsHtml $equipment.marca)+' / '+(Convert-OnsHtml $equipment.modelo)+'<br>Serial: '+(Convert-OnsHtml $equipment.numeroSerie)+' · Service Tag: '+(Convert-OnsHtml $equipment.serviceTag)+' · Tipo: '+(Convert-OnsHtml $equipment.tipo)+'<br>CPU: '+(Convert-OnsHtml $equipment.processador)+' · RAM: '+(Convert-OnsHtml $equipment.memoria)+' · Discos: '+(Convert-OnsHtml $equipment.armazenamento)+'</p><p>Cliente: '+(Convert-OnsHtml $Client)+' · Chamado: '+(Convert-OnsHtml $Ticket)+' · Técnico: '+(Convert-OnsHtml $Technician)+'</p></header>')
  foreach ($item in $results) {
    $recommendation=Convert-OnsHtml ($item.recommendations -join '; ')
    $html.Add('<section><h2>'+(Convert-OnsHtml $item.title)+'</h2><b class="'+$item.status+'">'+$item.status+'</b><p>'+(Convert-OnsHtml $item.summary)+'</p><pre>'+(Convert-OnsHtml $item.evidence.details)+'</pre><p>Orientação: '+$recommendation+'</p></section>')

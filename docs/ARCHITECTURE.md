@@ -1,4 +1,4 @@
-# OnSiteSuite 2.0 — arquitetura consolidada
+# OnSiteSuite 2.0.1 — arquitetura consolidada
 
 O repositório unifica o **FieldServiceSuite/FieldServiceToolkit 1.2.0** do ZIP enviado e o escopo do **OnSiteSuite**.
 Há **um produto**, um catálogo de testes, um padrão de laudo e dois adaptadores de sistemas operacionais.
@@ -44,3 +44,13 @@ O catálogo `Config/TroubleshootingFlows.json` é a fonte dos fluxos guiados. O 
 - `OK` significa que a coleta ou verificação específica foi concluída sem alerta detectado, **não** ausência de falhas.
 - Testes de áudio/tela são de enumeração, não equivalem a percepção visual/auditiva.
 - Nenhum comando faz reparos automáticos, corte de guilhotina, alteração de energia ou limpeza de disco.
+
+## Identificação inicial (v2.0.1)
+
+- Abertura interativa: coleta local, painel de contexto e menu de testes (nesta ordem).
+- Caminho não interativo: painel omitido, para manter saída previsível; inventário fica nos laudos.
+- Linux: `src/linux/equipment.sh`; Windows: `src/windows/Equipment.ps1`.
+- Sem inferir números de série a partir de UUID, MAC ou serial de placa-mãe.
+- Service Tag Dell é apresentada somente quando o fabricante é identificado e há serial confiável.
+- `equipamento` é campo opcional no esquema JSON 2.0 para preservar compatibilidade.
+- A interface não envia dados para servidores; logs/laudos permanecem locais.

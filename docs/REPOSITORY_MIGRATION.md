@@ -1,3 +1,8 @@
+> **Registro histórico da migração v2.0.0.** O GitHub já está renomeado para
+> `luisgazola/OnSiteSuite`. Para a versão **2.0.1**, utilize
+> [`RELEASE_2.0.1.md`](RELEASE_2.0.1.md). O script atual
+> `scripts/publish-github.sh` publica **v2.0.1**, não renomeia o repositório.
+
 # Migração do FieldServiceToolkit para OnSiteSuite
 
 ## Objetivo

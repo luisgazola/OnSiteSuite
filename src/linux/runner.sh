@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
-# OnSiteSuite v2.0.0 — CLI Linux offline-first
+# OnSiteSuite v2.0.1 — CLI Linux offline-first
 set -Eeuo pipefail
 ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
 # shellcheck source=probes.sh
 source "$ROOT_DIR/src/linux/probes.sh"
+# shellcheck source=equipment.sh
+source "$ROOT_DIR/src/linux/equipment.sh"
 umask 077
 VERSION="$(tr -d '\r\n' < "$ROOT_DIR/VERSION")"
 ONLINE=0
 LIST=0
+INFO_ONLY=0
+SHOW_INFO=0
 INTERACTIVE=0
 ALL=0
 PRINT_QUEUE=''
@@ -26,9 +30,11 @@ TMP=''
 
 usage() {
 cat <<'HELP'
-OnSiteSuite 2.0.0 — diagnóstico local Linux
+OnSiteSuite 2.0.1 — diagnóstico local Linux
 Uso: ./onsite.sh [opções]
   --list-tests                 Lista códigos de testes disponíveis
+  --info                       Exibe identificação do equipamento e sai
+  --show-info                  Mostra o painel também em execução não interativa
   --tests system,cpu,storage   Seleciona testes específicos
   --all                        Executa todas as sondagens passivas (exceto checklist)
   --interactive                Abre seleção de testes no terminal
@@ -51,6 +57,7 @@ needarg() { (($# >= 2)) || { printf 'Faltou valor para %s\n' "$1" >&2; exit 2; }
 while (($#)); do
   case "$1" in
     --list-tests) LIST=1; shift ;; --all) ALL=1; shift ;; --interactive) INTERACTIVE=1; shift ;;
+    --info) INFO_ONLY=1; shift ;; --show-info) SHOW_INFO=1; shift ;;
     --online) ONLINE=1; shift ;; --yes-print) CONFIRM_PRINT=1; shift ;; --quiet) QUIET=1; shift ;;
     --tests|--client|--ticket|--technician|--serial|--symptom|--output|--print-test)
       needarg "$@"; case "$1" in
@@ -62,7 +69,7 @@ while (($#)); do
     *) printf 'Opção desconhecida: %s\n' "$1" >&2; usage >&2; exit 2 ;;
   esac
 done
-if ! command -v jq >/dev/null 2>&1; then printf 'Erro: jq é obrigatório. No Gentoo: sudo emerge -av app-misc/jq\n' >&2; exit 3; fi
+if ! command -v jq >/dev/null 2>&1; then printf 'Erro: jq é obrigatório. Debian: apt install jq | Fedora: dnf install jq | Arch: pacman -S jq\n' >&2; exit 3; fi
 if ((LIST)); then jq -r '.tests[] | "\(.id)\t\(.title) [\(.kind)]"' "$ROOT_DIR/config/tests.json"; exit 0; fi
 if [[ -n "$PRINT_QUEUE" && "$CONFIRM_PRINT" != 1 ]]; then
   printf 'Recusado: --print-test exige --yes-print (confirma saída física de papel).\n' >&2; exit 2
@@ -73,6 +80,13 @@ if ((ALL)); then TESTS="$(jq -r '[.tests[] | select(.kind=="read-only") | .id] |
 if [[ -z "$TESTS" && "$INTERACTIVE" == 0 && -t 0 ]]; then INTERACTIVE=1; fi
 if [[ -z "$TESTS" ]]; then TESTS="$DEFAULT"; fi
 
+# Uma coleta por execução, antes do menu; os mesmos dados acompanham o laudo.
+EQUIPMENT_JSON="$(ons_collect_equipment)"
+if ((INFO_ONLY || (INTERACTIVE && QUIET == 0) || (SHOW_INFO && QUIET == 0))); then
+  ons_show_equipment "$EQUIPMENT_JSON" "$VERSION"
+fi
+if ((INFO_ONLY)); then exit 0; fi
+
 # Seleção interativa no terminal, sem obrigação de OS.
 if ((INTERACTIVE)); then
   mapfile -t ids < <(jq -r '.tests[].id' "$ROOT_DIR/config/tests.json")
@@ -80,7 +94,7 @@ if ((INTERACTIVE)); then
   IFS=',' read -ra initial <<< "$TESTS"
   for id in "${initial[@]}"; do chosen["$id"]=1; done
   while :; do
-    printf '\n=== OnSiteSuite v%s — Selecione os testes ===\n' "$VERSION"
+    printf '\n--- MENU DE TESTES | OnSiteSuite v%s ---\n' "$VERSION"
     for i in "${!ids[@]}"; do
       id="${ids[$i]}"; [[ "${chosen[$id]:-}" == 1 ]] && mark='x' || mark=' '
       title="$(jq -r --arg id "$id" '.tests[] | select(.id==$id) | .title' "$ROOT_DIR/config/tests.json")"
@@ -91,7 +105,7 @@ if ((INTERACTIVE)); then
     case "$answer" in
       r|R) TESTS=''; for id in "${ids[@]}"; do [[ "${chosen[$id]:-}" == 1 ]] && TESTS+="${TESTS:+,}$id"; done; break ;;
       q|Q) exit 0 ;;
-      a|A) for id in "${ids[@]}"; do [[ "$id" != checklist ]] && chosen["$id"]=1; done ;;
+      a|A) while IFS= read -r id; do chosen["$id"]=1; done < <(jq -r '.tests[] | select(.kind == "read-only") | .id' "$ROOT_DIR/config/tests.json") ;;
       *) if [[ "$answer" =~ ^[0-9]+$ ]] && ((answer >= 1 && answer <= ${#ids[@]})); then
            id="${ids[$((answer-1))]}"; if [[ "${chosen[$id]:-}" == 1 ]]; then unset 'chosen[$id]'; else chosen["$id"]=1; fi
          else printf 'Opção inválida.\n'; fi ;;
@@ -159,9 +173,9 @@ jq -n \
  --arg version "$VERSION" --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
  --arg client "$CLIENT" --arg ticket "$TICKET" --arg technician "$TECHNICIAN" --arg serial "$SERIAL" \
  --arg hostname "$(hostname 2>/dev/null || true)" --arg os 'linux' --argjson online "$ONLINE" \
- --slurpfile tests "$results_file" '
+ --argjson equipment "$EQUIPMENT_JSON" --slurpfile tests "$results_file" '
  {schemaVersion:"2.0",product:"OnSiteSuite",version:$version,createdAt:$timestamp,
-  platform:$os,host:$hostname,onlineChecksAuthorized:($online==1),
+  platform:$os,host:$hostname,equipamento:$equipment,onlineChecksAuthorized:($online==1),
   atendimento:{cliente:$client,chamado:$ticket,tecnico:$technician,serial:$serial},
   tests:$tests,
   summary:{total:($tests|length),ok:([$tests[]|select(.status=="OK")]|length),
@@ -172,7 +186,7 @@ jq -n \
   disclaimer:"Resultado diagnóstico auxiliar; não substitui validação física e julgamento profissional."}' > "$json"
 
 jq -r '
-"OnSiteSuite v\(.version) - Relatório técnico\nData UTC: \(.createdAt)\nHost: \(.host)\nCliente: \(.atendimento.cliente)\nChamado: \(.atendimento.chamado)\nTécnico: \(.atendimento.tecnico)\n\nResumo: \(.summary | tostring)\n",
+"OnSiteSuite v\(.version) - Relatório técnico\nData UTC: \(.createdAt)\nHost: \(.host)\nMarca/Modelo: \(.equipamento.marca) / \(.equipamento.modelo)\nSerial: \(.equipamento.numeroSerie) | Service Tag: \(.equipamento.serviceTag)\nTipo: \(.equipamento.tipo)\nCPU/RAM/Discos: \(.equipamento.processador) / \(.equipamento.memoria) / \(.equipamento.armazenamento)\nCliente: \(.atendimento.cliente)\nChamado: \(.atendimento.chamado)\nTécnico: \(.atendimento.tecnico)\n\nResumo: \(.summary | tostring)\n",
 (.tests[] | "\n[\(.status)] \(.title)\n\(.summary)\n\(.evidence.details)\nRecomendações: \(.recommendations|join("; "))")' "$json" > "$folder/relatorio.txt"
 
 cat > "$folder/relatorio.html" <<'HTML'
@@ -184,9 +198,9 @@ small{color:#cbd5e1}.tag{display:inline-block;padding:3px 9px;border-radius:99px
 pre{white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;background:#0f172a;border:1px solid #475569;padding:12px;border-radius:8px}footer{margin:22px 0;color:#94a3b8}a{color:#93c5fd}@media print{body{background:white;color:black}h1,h2{color:black}section,.hero,pre{background:white;color:black;border-color:#999}}
 </style></head><body>
 HTML
-jq -r '"<header class=\"hero\"><h1>OnSiteSuite v\(.version|@html)</h1><p>Laudo técnico · \(.createdAt|@html)</p><p>Host: \(.host|@html)<br>Cliente: \(.atendimento.cliente|@html)<br>Chamado: \(.atendimento.chamado|@html)<br>Técnico: \(.atendimento.tecnico|@html)<br>Serial informado: \(.atendimento.serial|@html)</p><p>Testes: \(.summary.total) · OK: \(.summary.ok) · Atenção: \(.summary.atencao) · Inconclusivos: \(.summary.inconclusivo) · Não suportados: \(.summary.naoSuportado)</p></header>"' "$json" >> "$folder/relatorio.html"
+jq -r '"<header class=\"hero\"><h1>OnSiteSuite v\(.version|@html)</h1><p>Excelsior Soluções em Tecnologia · Laudo técnico · \(.createdAt|@html)</p><p>Host: \(.host|@html)<br>Marca: \(.equipamento.marca|@html)<br>Modelo: \(.equipamento.modelo|@html)<br>Número de série: \(.equipamento.numeroSerie|@html)<br>Service Tag: \(.equipamento.serviceTag|@html)<br>Tipo: \(.equipamento.tipo|@html)<br>Processador: \(.equipamento.processador|@html)<br>Memória: \(.equipamento.memoria|@html)<br>Armazenamento: \(.equipamento.armazenamento|@html)<br>Cliente: \(.atendimento.cliente|@html)<br>Chamado: \(.atendimento.chamado|@html)<br>Técnico: \(.atendimento.tecnico|@html)<br>Serial informado: \(.atendimento.serial|@html)</p><p>Testes: \(.summary.total) · OK: \(.summary.ok) · Atenção: \(.summary.atencao) · Inconclusivos: \(.summary.inconclusivo) · Não suportados: \(.summary.naoSuportado)</p></header>"' "$json" >> "$folder/relatorio.html"
 jq -r '.tests[] | "<section><h2>\(.title|@html)</h2><span class=\"tag \(.status)\">\(.status)</span><p>\(.summary|@html)</p><pre>\(.evidence.details|@html)</pre><p><b>Orientação:</b> \((.recommendations|join("; "))|@html)</p></section>"' "$json" >> "$folder/relatorio.html"
-printf '<footer>Resultados auxiliares: confirmar em campo antes de concluir reparos. Relatório local gerado pelo OnSiteSuite 2.0.0.</footer></body></html>\n' >> "$folder/relatorio.html"
+printf '<footer>Resultados auxiliares: confirmar em campo antes de concluir reparos. Relatório local gerado pelo OnSiteSuite 2.0.1 · Excelsior Soluções em Tecnologia.</footer></body></html>\n' >> "$folder/relatorio.html"
 chmod 600 -- "$json" "$folder/relatorio.txt" "$folder/relatorio.html" || true
 if ((QUIET == 0)); then
   jq -r '"\nResumo: \(.summary.total) testes; OK=\(.summary.ok); atenção=\(.summary.atencao); inconclusivos=\(.summary.inconclusivo); não suportados=\(.summary.naoSuportado)"' "$json"

@@ -1,6 +1,6 @@
 # Roadmap de capacidade — transparência
 
-## Entregue nesta integração v2.0.0 (código-fonte)
+## Entregue v2.0.0 (código-fonte)
 
 - Interface de terminal para seleção de testes Windows/Linux.
 - OS opcional; execução direta de uma seleção; saída local JSON, TXT e HTML.
@@ -27,3 +27,8 @@
 - CI Windows real, Pester, análise estática, assinatura, SBOM e releases reproduzíveis.
 
 **Não classificar pendências como implementadas.**
+
+## Implementado na v2.0.1
+- Tela inicial com identificação local de equipamento no Linux e Windows (Windows pendente de homologação).
+- Inventário em relatórios JSON/TXT/HTML, com compatibilidade do schema 2.0.
+- Autoria e identidade Excelsior Soluções no terminal e laudos.

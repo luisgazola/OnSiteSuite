@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    OnSiteSuite v2.0.0 - Diagnóstico de Field Service para Windows.
+    OnSiteSuite v2.0.1 - Diagnóstico de Field Service para Windows.
 .DESCRIPTION
     Usa os serviços migrados de FieldServiceSuite 1.2.0. OS opcional.
 .EXAMPLE
@@ -13,6 +13,8 @@ param(
  [string]$Tests = '',
  [switch]$All,
  [switch]$ListTests,
+ [switch]$InfoOnly,
+ [switch]$ShowInfo,
  [switch]$Online,
  [string]$Client = '',
  [string]$Ticket = '',
@@ -25,4 +27,4 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'src/windows/Runner.ps1')
-Start-OnsWindows -RootPath $PSScriptRoot -Tests $Tests -All:$All -ListTests:$ListTests -Online:$Online -Client $Client -Ticket $Ticket -Technician $Technician -Serial $Serial -Symptom $Symptom -Output $Output -NonInteractive:$NonInteractive
+Start-OnsWindows -RootPath $PSScriptRoot -Tests $Tests -All:$All -ListTests:$ListTests -InfoOnly:$InfoOnly -ShowInfo:$ShowInfo -Online:$Online -Client $Client -Ticket $Ticket -Technician $Technician -Serial $Serial -Symptom $Symptom -Output $Output -NonInteractive:$NonInteractive
