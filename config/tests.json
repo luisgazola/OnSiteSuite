@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2.0",
+  "tests": [
+    {"id":"system","title":"Identificação do sistema","kind":"read-only"},
+    {"id":"cpu","title":"Processador e temperaturas disponíveis","kind":"read-only"},
+    {"id":"memory","title":"Memória RAM","kind":"read-only"},
+    {"id":"storage","title":"Discos e partições","kind":"read-only"},
+    {"id":"smart","title":"Saúde SMART (dependente de smartctl/permissões)","kind":"read-only"},
+    {"id":"battery","title":"Bateria e energia","kind":"read-only"},
+    {"id":"network","title":"Rede local (conectividade online opcional)","kind":"read-only"},
+    {"id":"usb","title":"Dispositivos USB","kind":"read-only"},
+    {"id":"printer","title":"Impressoras detectadas","kind":"read-only"},
+    {"id":"drivers","title":"Dispositivos e drivers disponíveis","kind":"read-only"},
+    {"id":"audio","title":"Dispositivos de áudio (não testa reprodução)","kind":"read-only"},
+    {"id":"display","title":"Monitores detectados","kind":"read-only"},
+    {"id":"logs","title":"Erros recentes do sistema","kind":"read-only"},
+    {"id":"security","title":"Indicadores de segurança do sistema","kind":"read-only"},
+    {"id":"checklist","title":"Checklist físico manual","kind":"interactive"},
+    {"id":"troubleshooting","title":"Fluxo guiado por sintoma (base legada)","kind":"guided"}
+  ]
+}

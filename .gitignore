@@ -1,0 +1,11 @@
+/Reports/*
+!/Reports/.gitkeep
+/Logs/*
+!/Logs/.gitkeep
+/build/
+*.o
+*.exe
+*.obj
+.DS_Store
+*.swp
+.vscode/

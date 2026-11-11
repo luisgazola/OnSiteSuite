@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://excelsior.local/schemas/onsitesuite-report-v2.json",
+  "title": "OnSiteSuite 2.0 diagnostic report",
+  "type": "object",
+  "required": ["schemaVersion", "product", "version", "createdAt", "platform", "atendimento", "tests", "summary"],
+  "properties": {
+    "schemaVersion": {"const": "2.0"},
+    "product": {"const": "OnSiteSuite"},
+    "version": {"type": "string"},
+    "createdAt": {"type": "string", "format": "date-time"},
+    "platform": {"enum": ["linux", "windows"]},
+    "host": {"type": "string"},
+    "onlineChecksAuthorized": {"type": "boolean"},
+    "atendimento": {
+      "type": "object", "required": ["cliente", "chamado", "tecnico", "serial"],
+      "properties": {
+        "cliente": {"type": "string"}, "chamado": {"type": "string"},
+        "tecnico": {"type": "string"}, "serial": {"type": "string"}
+      }
+    },
+    "tests": {
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["id", "title", "status", "summary", "evidence", "recommendations", "collectedAt"],
+        "properties": {
+          "id": {"type": "string"}, "title": {"type": "string"},
+          "status": {"enum": ["OK", "ATENCAO", "FALHA", "INCONCLUSIVO", "NAO_SUPORTADO"]},
+          "summary": {"type": "string"},
+          "evidence": {"type": "object", "required": ["details"], "properties": {"details":{"type":"string"}}},
+          "recommendations": {"type": "array", "items":{"type":"string"}},
+          "collectedAt": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["total", "ok", "atencao", "falha", "inconclusivo", "naoSuportado"],
+      "properties": {
+        "total":{"type":"integer","minimum":0}, "ok":{"type":"integer","minimum":0},
+        "atencao":{"type":"integer","minimum":0}, "falha":{"type":"integer","minimum":0},
+        "inconclusivo":{"type":"integer","minimum":0}, "naoSuportado":{"type":"integer","minimum":0}
+      }
+    }
+  }
+}

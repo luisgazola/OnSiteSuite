@@ -1,9 +1,3 @@
-<#
-.SYNOPSIS
-    FieldServiceSuite MVC - ferramenta prática para Field Service.
-#>
-Set-StrictMode -Version Latest
-$ErrorActionPreference = 'Continue'
-
-. "$PSScriptRoot\src\Core\Bootstrap.ps1"
-Start-FssApplication -RootPath $PSScriptRoot
+# Compatibility launcher for users of FieldServiceToolkit's former Start.ps1.
+# Does not start a separate application: forwards to OnSiteSuite v2.0.
+& (Join-Path $PSScriptRoot 'OnSiteSuite.ps1') @args
