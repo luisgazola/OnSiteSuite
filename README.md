@@ -1,167 +1,346 @@
-# OnSiteSuite v2.0.1
+<div align="center">
 
-**Excelsior Soluções — Field Service · Diagnóstico · Troubleshooting · Laudos**
+# OnSiteSuite
 
-O **OnSiteSuite** combina a base do projeto **FieldServiceToolkit/FieldServiceSuite v1.2.0** com uma arquitetura de suíte de diagnóstico **local, offline-first e multiplataforma**.
+**Diagnóstico técnico de campo, inventário de equipamentos e relatórios em uma única suíte de terminal.**
 
-> **Situação:** entrega de código-fonte integrado com CLI Linux executada em ambiente de testes. Adaptador Windows disponível, mas **ainda não homologado em Windows real**. Não confundir com lançamento comercial certificado.
+**Um projeto da Excelsior Soluções em Tecnologia** · Desenvolvido por **Luís Gazola**
 
-## Abertura de terminal e identificação do equipamento (novidade 2.0.1)
+![Versão](https://img.shields.io/badge/vers%C3%A3o-2.0.1-2563eb)
+![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-16a34a)
+![Linux](https://img.shields.io/badge/Linux-CLI%20testada-16a34a)
+![Windows](https://img.shields.io/badge/Windows-homologa%C3%A7%C3%A3o%20pendente-f59e0b)
+![Operação](https://img.shields.io/badge/opera%C3%A7%C3%A3o-offline--first-475569)
 
-Ao executar **sem parâmetros** em um terminal interativo, a primeira tela apresenta o nome
-**OnSiteSuite v2.0.1**, a descrição da suíte e sua identificação como projeto da
-**Excelsior Soluções em Tecnologia**, com crédito ao desenvolvedor **Luís Gazola**.
-Em seguida, exibe um **inventário local**: sistema operacional, número de série,
-Service Tag (quando identificável), marca, modelo, classificação Desktop/Notebook/AIO,
-processador, RAM e discos. Logo abaixo aparece o menu de testes, com seleção individual.
+[Conheça o projeto](#1-o-projeto) · [Funcionalidades](#2-o-que-a-su%C3%ADte-faz) · [Instalar](#4-instala%C3%A7%C3%A3o) · [Comandos](#5-guia-r%C3%A1pido-de-uso) · [Contribuir](#11-como-contribuir)
 
-- **Linux:** informações de DMI quando acessíveis, `/etc/os-release`, `/proc` e `lsblk`.
-- **Windows:** inventário via CIM/WMI, sem necessidade de instalar agente.
-- **Não identificado:** equipamento sem dados confiáveis, bloqueado por permissões ou com campo genérico de firmware.
-- **Service Tag:** em equipamentos Dell reconhecidos, corresponde ao identificador de série; em outras marcas não é presumida.
-- **Execução com parâmetros:** não imprime o painel por padrão, preservando o uso em automações.
-  Use `--show-info` (Linux) ou `-ShowInfo` (Windows) para também exibi-lo.
-- **Somente identificação:** `./onsite.sh --info` ou `./OnSiteSuite.ps1 -InfoOnly`, sem iniciar testes nem gerar laudos.
-- **Privacidade:** número de série é informação potencialmente sensível; não compartilhe relatórios publicamente.
+</div>
 
-Os mesmos dados são incluídos no objeto `equipamento` do relatório JSON, bem como nos
-laudos TXT/HTML. O esquema `2.0` é mantido por compatibilidade, com o campo adicional
-`equipamento` opcional para consumidores de relatórios antigos. A versão do aplicativo passa a `2.0.1`.
+---
 
-## Começar rapidamente
+## 1. O projeto
 
-### Linux — Debian/Ubuntu, Fedora e Arch Linux
+O **OnSiteSuite** é uma suíte **open source** para auxiliar profissionais de **Field Service, Help Desk, suporte técnico e manutenção de computadores** na coleta de informações do equipamento, execução de verificações selecionáveis, consulta a procedimentos de troubleshooting e geração de laudos técnicos.
 
-Requisitos: **Bash 5.2 ou superior** e **jq 1.7 ou superior**. A execução foi validada com Bash 5.2.37 e jq 1.7 neste ambiente. As demais ferramentas são opcionais: o relatório informa quando não estão disponíveis.
+Ele nasceu de uma necessidade recorrente no atendimento presencial: reunir informações confiáveis sobre o equipamento e documentar um diagnóstico exige alternar entre comandos, utilitários e anotações dispersas. Em atendimentos com pouco tempo, rede indisponível ou acesso restrito, esse fluxo se torna ainda menos eficiente.
 
-Instale `jq` com o gerenciador de pacotes da sua distribuição (**utilize apenas o bloco correspondente**):
+A proposta é reunir as etapas essenciais em uma experiência de terminal objetiva:
 
-**Debian / Ubuntu**
+**Identificar o equipamento → Escolher as verificações → Coletar evidências → Interpretar resultados → Gerar o relatório.**
+
+O programa funciona localmente, sem exigir conta, servidor, banco de dados, contêiner ou abertura prévia de ordem de serviço (OS). Os campos de cliente, chamado e técnico são **opcionais**.
+
+### Para quem foi criado?
+
+| Público | Aplicação prática |
+| --- | --- |
+| **Técnicos de campo e assistência** | Levantamento inicial de hardware e documentação do atendimento. |
+| **Equipes de suporte N1/N2 e service desk** | Coleta consistente de indicadores e evidências para escalonamento. |
+| **Administradores de sistemas** | Diagnósticos pontuais e execução por parâmetros em estações Linux/Windows. |
+| **Desenvolvedores e entusiastas** | Estudo e contribuição em automação, PowerShell, Bash, C++20, JSON Schema e arquitetura modular. |
+
+### De onde veio a versão 2.0.1?
+
+O projeto evolui o [FieldServiceToolkit](https://github.com/luisgazola/OnSiteSuite) (antigo nome do repositório), originalmente baseado em **FieldServiceSuite v1.2.0**. A série 2.x unificou o catálogo e o formato dos relatórios para Linux e Windows. Na **v2.0.1**, a abertura ganhou a **identificação do equipamento antes do menu de testes**, com identidade visual e autoria da Excelsior Soluções.
+
+> **Estado do projeto:** a CLI e os testes automatizados Linux foram executados no ambiente de desenvolvimento. Há um adaptador PowerShell para Windows, mas ele **ainda precisa ser homologado em máquinas Windows reais**. O OnSiteSuite é uma ferramenta de apoio ao diagnóstico, não um certificador de integridade de hardware.
+
+## 2. O que a suíte faz
+
+- **Identificação do equipamento:** sistema operacional, marca, modelo, número de série, Service Tag quando aplicável, classificação Desktop/Notebook/AIO, CPU, RAM e armazenamento.
+- **Testes selecionáveis:** execute somente as verificações relevantes; use o menu ou chame IDs diretamente pela CLI.
+- **Sondagens de sistema e periféricos:** dispositivos USB, interfaces de rede, impressoras configuradas, áudio, monitores, drivers, logs e indicadores parciais de segurança.
+- **Armazenamento e bateria:** inventário de discos, leitura SMART quando disponível, dados de bateria e energia fornecidos pelo sistema.
+- **Troubleshooting guiado:** orientações para sintomas como notebook lento, ausência de internet e problemas de bateria, sem reparos automáticos.
+- **Laudos locais:** saídas **JSON, TXT e HTML**, com informações da sessão, equipamento, resultados, evidências e recomendações.
+- **Operação offline-first:** nenhuma sondagem externa de rede é realizada sem a opção explícita correspondente.
+
+### Catálogo de verificações
+
+| Grupo | IDs para linha de comando | Alcance atual |
+| --- | --- | --- |
+| Sistema e desempenho | `system`, `cpu`, `memory` | Inventário e métricas disponíveis; não realiza teste de estresse ou teste físico integral de RAM. |
+| Armazenamento e energia | `storage`, `smart`, `battery` | Discos, indicadores SMART e bateria conforme sistema, permissões e hardware. |
+| Conectividade e periféricos | `network`, `usb`, `printer`, `drivers` | Configurações de rede, dispositivos e filas; não comprova estabilidade física do USB. |
+| Experiência e eventos | `audio`, `display`, `logs`, `security` | Enumeração de dispositivos e indicadores pontuais; não substitui testes audiovisuais ou auditoria de segurança. |
+| Apoio ao atendimento | `checklist`, `troubleshooting` | Checklist manual e instruções guiadas para sintomas conhecidos. |
+
+**Importante:** os estados `OK`, `ATENCAO`, `FALHA`, `INCONCLUSIVO` e `NAO_SUPORTADO` descrevem o **resultado da verificação específica**. Um `OK` não garante que todo o componente esteja íntegro.
+
+## 3. Prévia da experiência no terminal
+
+Ao iniciar sem argumentos em um terminal interativo, o programa apresenta o inventário e, abaixo dele, o menu de testes. Os dados a seguir são **fictícios**, apenas para ilustrar a interface.
+
+```text
+======================================================================
+  OnSiteSuite v2.0.1 | EXCELSIOR SOLUÇÕES
+  Suíte de diagnóstico, troubleshooting e laudos de Field Service
+  Autoria: Excelsior Soluções em Tecnologia
+  Desenvolvedor: Luís Gazola
+----------------------------------------------------------------------
+  IDENTIFICAÇÃO DO EQUIPAMENTO (coleta local; sem alterações)
+  Sistema operacional:       Debian GNU/Linux
+  Número de série:           EXEMPLO123
+  Service Tag:               Não identificado
+  Marca:                     Fabricante Exemplo
+  Modelo:                    Modelo Exemplo
+  Tipo:                      Notebook
+  Processador:               Processador Exemplo
+  Memória RAM:               16.0 GiB
+  Armazenamento:             nvme0n1 476G
+----------------------------------------------------------------------
+  Dados ausentes não são estimados. Confira as etiquetas quando necessário.
+======================================================================
+
+--- MENU DE TESTES | OnSiteSuite v2.0.1 ---
+ 1. [x] Identificação do sistema
+ 2. [x] Processador e temperaturas disponíveis
+ 3. [x] Memória RAM
+ ...
+ a=Todos os testes passivos | r=Executar | q=Sair
+ Escolha:
+```
+
+**Como navegar:** digite o **número** para marcar/desmarcar um teste; `a` seleciona as sondagens passivas; `r` executa; `q` sai. Os testes podem ser executados sem preencher OS ou cadastro de cliente.
+
+## 4. Instalação
+
+### 4.1 Linux — Debian/Ubuntu, Fedora e Arch Linux
+
+**Requisitos mínimos de execução:** Bash **5.2+** e `jq` **1.7+**. O conjunto de testes Linux foi executado com Bash 5.2.37 e jq 1.7; recursos como SMART e sensores podem exigir outros utilitários.
+
+Instale o `jq` na sua distribuição:
+
+<details>
+<summary><strong>Debian / Ubuntu</strong></summary>
 
 ```bash
 sudo apt update
 sudo apt install -y jq
 ```
 
-**Fedora**
+</details>
+
+<details>
+<summary><strong>Fedora</strong></summary>
 
 ```bash
 sudo dnf install -y jq
 ```
 
-**Arch Linux**
+</details>
+
+<details>
+<summary><strong>Arch Linux</strong></summary>
 
 ```bash
 sudo pacman -S --needed jq
 ```
 
-Verifique as versões instaladas antes de executar:
+</details>
+
+Confira os requisitos:
 
 ```bash
 bash --version | head -n 1
 jq --version
 ```
 
-Clone a versão específica do projeto e execute os diagnósticos:
+**Instalação a partir do Git (versão específica):**
 
 ```bash
 git clone --branch v2.0.1 --depth 1 https://github.com/luisgazola/OnSiteSuite.git
 cd OnSiteSuite
 chmod +x onsite.sh
-./onsite.sh                   # painel do equipamento + menu interativo, sem OS obrigatória
-./onsite.sh --info            # apenas dados do equipamento; não cria laudo
-./onsite.sh --list-tests
-./onsite.sh --tests system,cpu --show-info    # identifica mesmo em execução direta
-./onsite.sh --tests system,cpu,memory,storage,battery,usb,printer
-./onsite.sh --all --client "Empresa Exemplo" --technician "Técnico"
+./onsite.sh
 ```
 
-Se utilizar o ZIP da versão 2.0.1 em vez do Git, entre na pasta extraída (por exemplo, `cd OnSiteSuite-v2.0.1`) antes dos comandos `chmod` e `./onsite.sh`.
+**Sem Git:** baixe o [ZIP do código-fonte v2.0.1](https://github.com/luisgazola/OnSiteSuite/archive/refs/tags/v2.0.1.zip), extraia e, no terminal, entre na pasta extraída (`OnSiteSuite-2.0.1`). Em seguida execute `chmod +x onsite.sh` e `./onsite.sh`.
 
-Para ampliar as sondagens, instale **apenas os pacotes opcionais necessários**:
+**Dependências opcionais:**
 
-| Recurso | Debian/Ubuntu | Fedora | Arch Linux |
+| Função | Debian / Ubuntu | Fedora | Arch Linux |
 | --- | --- | --- | --- |
-| SMART (discos) | `smartmontools` | `smartmontools` | `smartmontools` |
-| Cliente de impressão CUPS | `cups-client` | `cups-client` | `cups` |
-| Identificação PCI | `pciutils` | `pciutils` | `pciutils` |
-| Identificação USB | `usbutils` | `usbutils` | `usbutils` |
+| SMART | `smartmontools` | `smartmontools` | `smartmontools` |
+| Impressão via CUPS | `cups-client` | `cups-client` | `cups` |
+| Dispositivos PCI | `pciutils` | `pciutils` | `pciutils` |
+| Dispositivos USB | `usbutils` | `usbutils` | `usbutils` |
 | Sensores | `lm-sensors` | `lm_sensors` | `lm_sensors` |
 
-A disponibilidade dos testes depende do hardware, drivers, permissões e configuração local de impressoras.
+Instale somente o que for necessário para o atendimento. Algumas leituras podem continuar indisponíveis por limitações do firmware, drivers ou permissões.
 
-Guia de troubleshooting reaproveita a base de fluxos do FieldServiceToolkit:
+### 4.2 Windows 10/11 — PowerShell 7
+
+**Alvo de compatibilidade documentado:** PowerShell **7.4.6** (ainda sem homologação Windows real nesta versão). Use **PowerShell 7 (`pwsh`)**, não presuma compatibilidade com o Windows PowerShell 5.1.
+
+1. Instale o [PowerShell 7.4.6](https://github.com/PowerShell/PowerShell/releases/tag/v7.4.6) e o [Git para Windows](https://git-scm.com/downloads/win) se desejar clonar via Git. Também é possível baixar o ZIP sem instalar Git.
+2. Abra o **PowerShell 7** e confira `pwsh --version`.
+3. Escolha **uma** das formas de obter o projeto:
+
+**Via Git:**
+
+```powershell
+git clone --branch v2.0.1 --depth 1 https://github.com/luisgazola/OnSiteSuite.git
+Set-Location .\OnSiteSuite
+```
+
+**Via ZIP, sem Git:** baixe o [código-fonte v2.0.1](https://github.com/luisgazola/OnSiteSuite/archive/refs/tags/v2.0.1.zip), extraia e acesse a pasta pelo PowerShell 7, por exemplo:
+
+```powershell
+Set-Location "$HOME\Downloads\OnSiteSuite-2.0.1"
+```
+
+Se a pasta foi extraída em outro local, ajuste o caminho. Para iniciar:
+
+```powershell
+.\OnSiteSuite.ps1
+```
+
+Se o Windows bloquear a execução de um script baixado, **verifique a origem e o conteúdo antes de desbloqueá-lo**. Evite alterar permanentemente a política de execução do computador. Consulte a [documentação da Microsoft sobre políticas de execução](https://learn.microsoft.com/powershell/module/microsoft.powershell.security/set-executionpolicy).
+
+## 5. Guia rápido de uso
+
+Os exemplos abaixo devem ser executados **dentro da pasta do projeto**. A abertura interativa é a maneira mais fácil de começar.
+
+### Linux (Bash)
+
+```bash
+./onsite.sh                                         # painel + menu interativo
+./onsite.sh --info                                  # somente identificação; não cria laudo
+./onsite.sh --list-tests                            # IDs dos testes disponíveis
+./onsite.sh --tests system,cpu,memory,storage       # seleção direta
+./onsite.sh --tests system,cpu --show-info          # mostra inventário antes da coleta
+./onsite.sh --all                                   # todas as sondagens passivas
+./onsite.sh --tests network --online                # autoriza testes externos de rede
+./onsite.sh --tests storage,smart --output ./Laudos # escolhe destino dos relatórios
+./onsite.sh --help                                  # todas as opções de CLI
+```
+
+**Com dados opcionais do atendimento:**
+
+```bash
+./onsite.sh --all --client "Empresa Exemplo" --ticket "CH-1234" --technician "Técnico Responsável"
+```
+
+**Troubleshooting orientativo:**
 
 ```bash
 ./onsite.sh --tests network,troubleshooting --symptom sem_internet
 ./onsite.sh --tests cpu,memory,storage,troubleshooting --symptom notebook_lento
+./onsite.sh --tests battery,troubleshooting --symptom bateria
 ```
 
-No Windows, use `-Tests 'troubleshooting' -Symptom 'bateria'`.
-
-Verificações externas de conectividade são **opt-in**:
-
-```bash
-./onsite.sh --tests network --online
-```
-
-Para envio físico **autorizado** de uma página via fila CUPS (não testa guilhotina):
+**Teste físico de impressão (Linux/CUPS):** só use com uma fila configurada e autorização explícita:
 
 ```bash
 ./onsite.sh --tests printer --print-test MINHA_FILA --yes-print
 ```
 
-### Windows (PowerShell)
+O envio do trabalho à fila **não confirma** que a impressão saiu corretamente e **não aciona a guilhotina**.
 
-Perfil de dependência definido: **PowerShell 7.4.6** em Windows 10/11 (alvo de compatibilidade, **sem teste de execução nesta entrega**). O código utiliza CIM, PowerShell de Gerenciamento de Dispositivos e Serviços de Armazenamento disponíveis conforme edição/permissões. **Não validado nesta entrega em máquina Windows.**
+### Windows (PowerShell 7)
 
 ```powershell
-cd OnSiteSuite-v2.0.1
-.\OnSiteSuite.ps1 -ListTests
-.\OnSiteSuite.ps1                    # painel e menu de testes
-.\OnSiteSuite.ps1 -InfoOnly         # identifica sem iniciar testes
-.\OnSiteSuite.ps1 -Tests 'system,cpu,memory,storage,battery,usb,printer' -NonInteractive
-.\OnSiteSuite.ps1 -All -Client 'Empresa Exemplo' -Ticket 'CH123456' -Technician 'Técnico'
-.\OnSiteSuite.ps1 -Tests network -Online
+.\OnSiteSuite.ps1                                                  # painel + menu interativo
+.\OnSiteSuite.ps1 -InfoOnly                                        # somente identificação
+.\OnSiteSuite.ps1 -ListTests                                       # lista os testes
+.\OnSiteSuite.ps1 -Tests 'system,cpu,memory,storage' -NonInteractive
+.\OnSiteSuite.ps1 -Tests 'system,cpu' -ShowInfo -NonInteractive
+.\OnSiteSuite.ps1 -All                                            # todas as sondagens passivas
+.\OnSiteSuite.ps1 -Tests network -Online                           # consulta externa autorizada
+.\OnSiteSuite.ps1 -Tests troubleshooting -Symptom bateria -NonInteractive
 ```
 
-**Não é necessário cadastrar cliente ou OS.** Use `-Ticket`, `-Client`, `-Technician`, `-Serial` no Windows ou as flags equivalentes em Linux somente quando desejado.
+**Com dados opcionais do atendimento:**
 
-## Relatórios
+```powershell
+.\OnSiteSuite.ps1 -All -Client 'Empresa Exemplo' -Ticket 'CH-1234' -Technician 'Técnico Responsável'
+```
 
-A cada execução, são criados **três arquivos locais**, no diretório `Reports/AAAA/MM/DD/SESSAO/`:
+A ferramenta **não solicita elevação automaticamente**. Determinadas leituras podem resultar em `INCONCLUSIVO` ou `NAO_SUPORTADO` quando faltam permissões ou APIs do sistema.
 
-- `relatorio.json` — estrutura canônica para importação/automação.
-- `relatorio.txt` — leitura rápida e histórico textual.
-- `relatorio.html` — laudo legível e imprimível pelo navegador, sem conexão.
+### Referência curta de parâmetros
 
-Os estados são `OK`, `ATENCAO`, `FALHA`, `INCONCLUSIVO`, `NAO_SUPORTADO`. **OK não significa aprovação integral do hardware**: a explicação de cada teste delimita o que foi realmente medido.
+| Objetivo | Linux | Windows |
+| --- | --- | --- |
+| Identificar o equipamento | `--info` | `-InfoOnly` |
+| Mostrar identificação junto com teste | `--show-info` | `-ShowInfo` |
+| Listar testes | `--list-tests` | `-ListTests` |
+| Selecionar testes | `--tests cpu,memory` | `-Tests 'cpu,memory'` |
+| Executar sondagens passivas | `--all` | `-All` |
+| Autorizar conectividade externa | `--online` | `-Online` |
+| Cliente e chamado opcionais | `--client`, `--ticket` | `-Client`, `-Ticket` |
+| Técnico responsável | `--technician` | `-Technician` |
+| Sintoma orientativo | `--symptom` | `-Symptom` |
+| Alterar pasta dos relatórios | `--output` | `-Output` |
 
-## Testes oferecidos
+## 6. Relatórios e evidências
 
-`system`, `cpu`, `memory`, `storage`, `smart`, `battery`, `network`, `usb`, `printer`, `drivers`, `audio`, `display`, `logs`, `security`, `checklist`, `troubleshooting`.
-
-Em ambos os sistemas há sondagens **passivas**, não testes físicos completos. `smart`, sensores, bateria, impressora e monitores variam conforme equipamento, fabricante, privilégios e drivers. `checklist` pede confirmação manual quando há terminal interativo. O teste de impressão CUPS requer consentimento explícito.
-
-## Estrutura
+Depois de um diagnóstico, o OnSiteSuite cria uma pasta de sessão local no formato:
 
 ```text
-OnSiteSuite-v2.0.1/
-├── onsite.sh                     # Linux
-├── OnSiteSuite.ps1               # Windows
-├── config/tests.json             # catálogo compartilhado
-├── config/report.schema.json     # contrato de laudo
-├── src/linux/                    # sondas Linux, inventário e runner
-├── src/windows/{Runner,Equipment}.ps1 # adaptador e inventário Windows
-├── src/{Controllers,Services,...} # módulos preservados do projeto original
-├── native/                       # utilitário opcional C++20
-├── tests/                        # smoke tests Linux
-├── docs/                         # arquitetura e roadmap
-├── Config/ e KnowledgeBase/      # artefatos anteriores preservados
-└── Reports/                      # relatórios locais (ignorados no Git)
+Reports/
+└── AAAA/
+    └── MM/
+        └── DD/
+            └── sem-os-HHMMSS-ID/
+                ├── relatorio.json
+                ├── relatorio.txt
+                └── relatorio.html
 ```
 
-### Compilar coletor nativo opcional (C++20)
+- **JSON:** resultado estruturado para ferramentas, integrações e processamento posterior. Usa `schemaVersion: "2.0"`; a versão do programa é `2.0.1`.
+- **TXT:** consulta rápida, histórico textual e leitura em qualquer editor.
+- **HTML:** laudo legível no navegador, inclusive offline, com dados do equipamento, evidências e recomendações.
+
+**Abrir o laudo HTML mais recente:**
+
+Linux (com ambiente gráfico):
+
+```bash
+xdg-open "$(find Reports -type f -name relatorio.html | sort | tail -n 1)"
+```
+
+Windows (PowerShell):
+
+```powershell
+Get-ChildItem .\Reports -Recurse -Filter relatorio.html |
+  Sort-Object LastWriteTime -Descending |
+  Select-Object -First 1 |
+  ForEach-Object { Start-Process $_.FullName }
+```
+
+Os arquivos podem conter **nome do cliente, hostname, IP, logs e número de série**. Revise e anonimiza-os antes de anexar a chamados públicos ou compartilhar com terceiros. Em Linux, a suíte cria relatórios com permissões restritivas; em Windows, aplicam-se as permissões da pasta de destino.
+
+## 7. Estrutura e escolhas de engenharia
+
+```text
+OnSiteSuite/
+├── onsite.sh                    # entrada da CLI Linux
+├── OnSiteSuite.ps1              # entrada da CLI Windows
+├── VERSION                      # versão 2.0.1
+├── config/
+│   ├── tests.json              # catálogo compartilhado
+│   └── report.schema.json      # contrato JSON dos laudos
+├── src/
+│   ├── linux/                 # coletor, execução e inventário Bash
+│   ├── windows/               # executor e inventário PowerShell/CIM
+│   └── Controllers/, Services/, Models/ ... # base modular legada
+├── Config/ e KnowledgeBase/    # regras e fluxos herdados
+├── native/                     # coletor auxiliar C++20 (opcional)
+├── tests/                      # verificações automatizadas Linux
+├── docs/                       # arquitetura, roadmap, segurança e histórico
+├── scripts/                    # publicação e manutenção do projeto
+└── Reports/                    # saída local; conteúdo ignorado pelo Git
+```
+
+**Princípios:** catálogo único de verificações; coleta separada da apresentação; sem obrigatoriedade de OS; estados padronizados; JSON Schema; tratamento explícito de resultados inconclusivos; relatórios locais; aproveitamento da camada de serviços do FieldServiceToolkit.
+
+**Stack:** Bash, PowerShell 7, utilitários nativos do sistema, `jq` e módulo auxiliar **C++20/CMake**. O aplicativo atual é uma **CLI**; a interface gráfica Qt está **no roadmap**, não nesta versão. Não é necessário Docker, Kubernetes, banco de dados nem API externa.
+
+### Compilar o coletor nativo opcional
+
+Se tiver **CMake e compilador compatível com C++20**, execute no Linux:
 
 ```bash
 cmake -S native -B build/native -DCMAKE_BUILD_TYPE=Release
@@ -169,9 +348,7 @@ cmake --build build/native
 ./build/native/onsite-probe --json
 ```
 
-O coletor native é auxiliar, sem dependências externas e não obrigatório para uso da CLI.
-
-### Testar Linux
+### Executar testes de desenvolvimento (Linux)
 
 ```bash
 bash tests/check-catalog.sh
@@ -179,29 +356,76 @@ bash tests/equipment-linux.sh
 bash tests/smoke-linux.sh
 ```
 
-## Segurança
+Leia também [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/ROADMAP.md`](docs/ROADMAP.md) e [`CHANGELOG.md`](CHANGELOG.md).
 
-- **Offline por padrão;** o aplicativo não envia telemetria e não altera estado do equipamento automaticamente.
-- Não executa reparos, flash de BIOS, testes de estresse, corte de papel ou ações privilegiadas sem implementação e confirmação apropriadas.
-- Identificação de uma fila de impressão não prova comunicação, qualidade de impressão nem estado da guilhotina.
-- Laudos podem conter nomes, hostname, IP e detalhes de logs; trate-os como informação sensível.
+## 8. Segurança e privacidade
 
-## Integração ExcelsiorDesk
+O uso em campo exige previsibilidade e respeito aos dados do cliente. Por isso, o projeto segue as seguintes decisões:
 
-O contrato JSON v2 permite futura integração com OS no ExcelsiorDesk, **ainda não implementada**. OnSiteSuite é utilizável sem SaaS, banco, Docker e internet.
+- **Offline por padrão:** não há telemetria automática; verificações externas de rede exigem `--online` / `-Online`.
+- **Coleta não destrutiva:** o fluxo padrão observa informações expostas pelo sistema e grava os relatórios localmente, sem executar reparos ou reinicializações automáticas.
+- **Ações físicas explícitas:** imprimir uma página em Linux requer `--print-test` e `--yes-print`; não há execução automática de corte de papel.
+- **Privilégios mínimos:** o aplicativo não exige execução integral como administrador/root; leituras indisponíveis são registradas com a limitação correspondente.
+- **Evidência com contexto:** ausência de erro em uma sondagem não é certificado de integridade, e informações ausentes não devem ser inventadas.
+- **Proteção de dados:** laudos são responsabilidade do operador; evite publicá-los sem remover dados pessoais, identificadores e informações corporativas.
 
-## Referências e licença
+Consulte [`SECURITY.md`](SECURITY.md) e [`docs/SECURITY.md`](docs/SECURITY.md) para orientações e reporte privado de vulnerabilidades. **Use o software somente em equipamentos sob sua responsabilidade ou com autorização.**
 
-Código de origem de **FieldServiceSuite v1.2.0**, sob licença MIT, preservado e adaptado. Consulte `LICENSE`, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md` e `docs/SECURITY.md`. As fontes de engenharia de software fornecidas pelo projeto serviram de diretrizes de modularização, manutenibilidade e testes; nenhum conteúdo dos livros foi reproduzido no código.
+## 9. Limitações conhecidas e próximos passos
 
-## Repositório oficial e publicação v2.0.1
+| Situação | Estado na v2.0.1 |
+| --- | --- |
+| CLI Linux e testes automatizados de catálogo/inventário | **Executados no ambiente de desenvolvimento** |
+| CLI PowerShell para Windows | **Implementada; homologação em hardware real pendente** |
+| Identificação e relatórios JSON/TXT/HTML | **Implementados** (coleta depende do sistema) |
+| Testes SMART e sensores específicos | **Dependem de hardware, ferramentas e permissões** |
+| Teste de impressão Linux/CUPS | **Envio de um job sob consentimento; resultado físico exige verificação** |
+| Monitoramento contínuo USB, sequência avançada de impressão, guilhotina | **Planejado** |
+| Testes audiovisuais interativos e verificação aprofundada de memória | **Planejados** |
+| GUI Qt, histórico local avançado e integração API com ExcelsiorDesk | **Planejados** |
 
-O repositório **FieldServiceToolkit** já foi renomeado para **OnSiteSuite**,
-preservando o histórico Git original: https://github.com/luisgazola/OnSiteSuite.
+A evolução do produto prioriza procedimentos verificáveis, melhorias de cobertura por plataforma e homologação em cenários reais de Field Service. Veja o [roadmap detalhado](docs/ROADMAP.md).
 
-A nova versão pode ser publicada na branch `main` e marcada com a **nova tag `v2.0.1`**.
-Nunca sobrescreva ou mova a tag anterior `v2.0.0`. Veja
-[`docs/RELEASE_2.0.1.md`](docs/RELEASE_2.0.1.md) e o script `bash scripts/publish-github.sh`.
+## 10. Dúvidas frequentes
 
-**Nota:** até a nova tag ser publicada no GitHub, os exemplos de clone por `--branch v2.0.1`
-só funcionarão após essa publicação. O ZIP desta entrega pode ser executado diretamente.
+**Preciso cadastrar uma OS ou cliente?** Não. Execute diretamente pelo menu ou por parâmetro; os dados do atendimento são opcionais.
+
+**Preciso de internet?** Não para as verificações locais e os relatórios. As sondagens externas de rede exigem autorização explícita.
+
+**O programa repara automaticamente o computador?** Não. Ele coleta evidências e apresenta orientações; reparos dependem de decisão técnica e ferramentas apropriadas.
+
+**Por que o número de série ou Service Tag aparece como “Não identificado”?** Alguns equipamentos não expõem esses dados, apresentam valores genéricos de firmware ou restringem o acesso. O OnSiteSuite evita deduzir identificadores não confirmados.
+
+**Por que um teste retorna `INCONCLUSIVO` ou `NAO_SUPORTADO`?** Pode faltar utilitário, permissão, driver, API ou dispositivo compatível. Consulte a evidência e a recomendação correspondente no relatório.
+
+## 11. Como contribuir
+
+Contribuições de técnicos, desenvolvedores, estudantes e entusiastas são bem-vindas, especialmente em suporte multiplataforma, documentação, testes e melhorias de acessibilidade da CLI.
+
+1. Leia [`CONTRIBUTING.md`](CONTRIBUTING.md) e abra uma *issue* descrevendo o problema ou sugestão (sem dados sensíveis).
+2. Faça um fork, crie uma branch específica e implemente alterações pequenas e verificáveis.
+3. Rode os testes disponíveis, documente limitações e descreva o ambiente em que validou.
+4. Abra um *pull request* indicando objetivo, impacto, instruções de teste e eventuais riscos.
+
+O projeto recomenda **Conventional Commits**, por exemplo `feat:`, `fix:`, `docs:` e `test:`. Consulte também [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
+
+## 12. Referências, autoria e licença
+
+**Projeto:** OnSiteSuite · **Versão:** `2.0.1`  
+**Empresa e identidade do produto:** **Excelsior Soluções em Tecnologia**  
+**Desenvolvedor:** **Luís Gazola** · [GitHub @luisgazola](https://github.com/luisgazola)  
+**Repositório oficial:** [github.com/luisgazola/OnSiteSuite](https://github.com/luisgazola/OnSiteSuite)
+
+A implementação evoluiu do **FieldServiceToolkit / FieldServiceSuite v1.2.0**, preservando componentes PowerShell e o histórico técnico do repositório. O projeto adota práticas de modularização, separação de responsabilidades, documentação e testes inspiradas em referências clássicas de engenharia de software, como *Arquitetura Limpa* (Robert C. Martin), *Refatoração* (Martin Fowler), *O Programador Pragmático* (Andrew Hunt e David Thomas) e *TDD* (Kent Beck).
+
+O código é disponibilizado sob a **[licença MIT](LICENSE)**, conforme o arquivo oficial do repositório (`Copyright (c) 2026 Luís Gazola`). Consulte a licença para os direitos e condições completos.
+
+---
+
+<div align="center">
+
+**OnSiteSuite v2.0.1 · Diagnósticos mais organizados, evidências rastreáveis e foco no trabalho técnico de campo.**
+
+[Repositório](https://github.com/luisgazola/OnSiteSuite) · [Histórico de alterações](CHANGELOG.md) · [Roadmap](docs/ROADMAP.md) · [Contribuir](CONTRIBUTING.md)
+
+</div>
