@@ -6,7 +6,7 @@ TMP="$(mktemp -d)"
 trap 'rm -rf -- "$TMP"' EXIT
 folder="$("$ROOT/onsite.sh" --tests system --quiet --output "$TMP")"
 file="$folder/relatorio.json"
-jq -e '.schemaVersion=="2.0" and .product=="OnSiteSuite" and .version=="2.0.3" and
+jq -e '.schemaVersion=="2.0" and .product=="OnSiteSuite" and .version=="2.1.0" and
   .equipamento.numeroSerie and (.tests|length==1) and .summary.total==1' "$file" >/dev/null
 if python3 -c 'import jsonschema' >/dev/null 2>&1; then
  python3 - "$ROOT/config/report.schema.json" "$file" <<'PY'

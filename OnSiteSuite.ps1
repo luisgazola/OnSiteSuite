@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    OnSiteSuite v2.0.3 - Diagnóstico de Field Service para Windows.
+    OnSiteSuite v2.1.0 - Diagnóstico de Field Service para Windows.
 .DESCRIPTION
     Usa os serviços migrados de FieldServiceSuite 1.2.0. OS opcional.
 .EXAMPLE
@@ -22,10 +22,24 @@ param(
  [string]$Serial = '',
  [string]$Symptom = '',
  [string]$Output = '',
- [switch]$NonInteractive
+ [switch]$NonInteractive,
+ [switch]$UsbMonitor,
+ [switch]$UsbMonitorWorker,
+ [ValidateSet('Auto','PowerShell','CMD')][string]$UsbTerminal = 'Auto',
+ [double]$UsbInterval = 1,
+ [int]$UsbSamples = 0,
+ [string]$PrintQueue = '',
+ [int]$PrintCount = 1,
+ [string]$PrintBrand = 'Não identificado',
+ [string]$PrintModel = 'Não identificado',
+ [switch]$EscPosRaw,
+ [switch]$CutAfterEach,
+ [ValidateSet('full','partial')][string]$CutMode = 'full',
+ [switch]$YesPrint,
+ [switch]$YesCut
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'src/windows/Runner.ps1')
 $dependencies = New-OnsWindowsDependencies
-Start-OnsWindows -Dependencies $dependencies -RootPath $PSScriptRoot -Tests $Tests -All:$All -ListTests:$ListTests -InfoOnly:$InfoOnly -ShowInfo:$ShowInfo -Online:$Online -Client $Client -Ticket $Ticket -Technician $Technician -Serial $Serial -Symptom $Symptom -Output $Output -NonInteractive:$NonInteractive
+Start-OnsWindows -Dependencies $dependencies -RootPath $PSScriptRoot -Tests $Tests -All:$All -ListTests:$ListTests -InfoOnly:$InfoOnly -ShowInfo:$ShowInfo -Online:$Online -Client $Client -Ticket $Ticket -Technician $Technician -Serial $Serial -Symptom $Symptom -Output $Output -NonInteractive:$NonInteractive -UsbMonitor:$UsbMonitor -UsbMonitorWorker:$UsbMonitorWorker -UsbTerminal $UsbTerminal -UsbInterval $UsbInterval -UsbSamples $UsbSamples -PrintQueue $PrintQueue -PrintCount $PrintCount -PrintBrand $PrintBrand -PrintModel $PrintModel -EscPosRaw:$EscPosRaw -CutAfterEach:$CutAfterEach -CutMode $CutMode -YesPrint:$YesPrint -YesCut:$YesCut

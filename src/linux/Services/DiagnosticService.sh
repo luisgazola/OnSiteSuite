@@ -36,19 +36,3 @@ ons_run_tests() {
    cat "$tmp_dir/result.json" >> "$results_file"
  done
 }
-ons_run_print_test() {
- local queue="$1" version="$2" tmp_dir="$3" results_file="$4" submit_cb="$5" output status summary recommendation
- local CURRENT_TEST='print_test' CURRENT_TITLE='Página de teste de impressora (autorizada)'
- if ! command -v lp >/dev/null 2>&1; then
-   make_result 'NAO_SUPORTADO' 'Cliente de impressão lp ausente' '' 'Instale o cliente CUPS.' >> "$results_file"
-   return
- fi
- printf 'OnSiteSuite %s - Teste de impressao\nData UTC: %s\nFila: %s\n\nVerifique qualidade, alinhamento e alimentacao.\n' \
-   "$version" "$(date -u +%FT%TZ)" "$queue" > "$tmp_dir/print.txt"
- if output="$("$submit_cb" "$queue" "$tmp_dir/print.txt" 2>&1)"; then
-   status='INCONCLUSIVO'; summary='Job enviado; resultado físico requer conferência'; recommendation='Confirme visualmente se o papel foi impresso corretamente.'
- else
-   status='ATENCAO'; summary='Falha ao enviar job de impressão'; recommendation='Verifique fila, cabo, interface e status da impressora.'
- fi
- make_result "$status" "$summary" "$output" "$recommendation" >> "$results_file"
-}

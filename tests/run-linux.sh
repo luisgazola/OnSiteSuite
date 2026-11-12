@@ -4,4 +4,8 @@ ROOT="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 for test in check-catalog equipment-linux architecture-linux smoke-linux contract-linux troubleshooting-linux cleanup-linux; do
   bash "$ROOT/tests/$test.sh"
 done
-printf 'OK: suíte de regressão Linux v2.0.3 completa.\n'
+
+bash "$ROOT/tests/usb-monitor-linux.sh"
+bash "$ROOT/tests/terminal-linux.sh"
+bash "$ROOT/tests/printing-linux.sh"
+printf 'OK: suíte completa Linux v2.1.0.\n'

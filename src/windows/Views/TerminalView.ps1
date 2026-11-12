@@ -16,8 +16,10 @@ function Read-OnsWindowsSelection {
      $mark = if ($chosen.Contains($t.id)) { 'x' } else { ' ' }
      Write-Host ('{0,2}. [{1}] {2}' -f ($i+1),$mark,$t.title)
    }
-   $answer = (Read-Host 'Número: alternar; R: executar; A: todos passivos; Q: sair').Trim()
-   if ($answer -match '^[rR]$') { return [pscustomobject]@{Cancelled=$false;Tests=($chosen.ToArray() -join ',')} }
+   $answer = (Read-Host 'Número: alternar; R: executar; A: todos; U: monitor USB; P: imprimir; Q: sair').Trim()
+   if ($answer -match '^[rR]$') { return [pscustomobject]@{Cancelled=$false;Action='tests';Tests=($chosen.ToArray() -join ',')} }
+   if ($answer -match '^[uU]$') { return [pscustomobject]@{Cancelled=$false;Action='usb';Tests=''} }
+   if ($answer -match '^[pP]$') { return [pscustomobject]@{Cancelled=$false;Action='print';Tests=''} }
    if ($answer -match '^[qQ]$') { return [pscustomobject]@{Cancelled=$true;Tests=''} }
    if ($answer -match '^[aA]$') {
      $chosen.Clear()
@@ -39,4 +41,26 @@ function Read-OnsWindowsChecklist([string[]]$Items) {
     $answers.Add([pscustomobject]@{Item=$item;Resultado=$answer})
   }
   return $answers.ToArray()
+}
+
+function Read-OnsWindowsPrintOptions {
+  Write-Host 'Filas disponíveis:' -ForegroundColor Cyan
+  if (Get-Command Get-Printer -ErrorAction SilentlyContinue) {
+    Get-Printer -ErrorAction SilentlyContinue | Select-Object Name,DriverName | Format-Table -AutoSize
+  }
+  $queue=(Read-Host 'Nome da fila (vazio cancela)').Trim()
+  if (-not $queue) { return [pscustomobject]@{Cancelled=$true} }
+  $text=(Read-Host 'Quantidade [1/3/5 ou 1..100]').Trim()
+  $number=0
+  if (-not [int]::TryParse($text,[ref]$number) -or $number -lt 1 -or $number -gt 100) {Write-Warning 'Quantidade inválida.';return [pscustomobject]@{Cancelled=$true}}
+  $brand=(Read-Host 'Marca (ENTER = não identificado)').Trim()
+  $model=(Read-Host 'Modelo (ENTER = não identificado)').Trim()
+  if (-not $brand) {$brand='Não identificado'}
+  if (-not $model) {$model='Não identificado'}
+  $raw=((Read-Host 'Impressora comprovadamente compatível com ESC/POS RAW? [s/N]').Trim() -match '^[sS]$')
+  $cut=$false
+  if ($raw) { $cut=((Read-Host 'Possui guilhotina ESC/POS? Cortar após cada impressão? [s/N]').Trim() -match '^[sS]$') }
+  Write-Warning "Serão enviados $number comprovantes REAIS para $queue. Corte ESC/POS: $cut."
+  if ((Read-Host 'Autoriza impressão? Digite SIM') -cne 'SIM') {return [pscustomobject]@{Cancelled=$true}}
+  return [pscustomobject]@{Cancelled=$false;Queue=$queue;Count=$number;Brand=$brand;Model=$model;Raw=$raw;Cut=$cut}
 }

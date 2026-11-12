@@ -1,4 +1,4 @@
-# Arquitetura — OnSiteSuite v2.0.3
+# Arquitetura — OnSiteSuite v2.1.0
 
 ## Objetivo
 
@@ -56,3 +56,25 @@ bash tests/run-linux.sh
 pwsh -NoProfile -File ./tests/architecture-windows.ps1
 pwsh -NoProfile -File ./tests/adapters-windows.ps1
 ```
+
+## Novos casos de uso — v2.1.0
+
+- `UsbMonitorService`: inicia uma sessão por amostragem, compara enumerações e escreve `usb-eventos.jsonl`; a View do terminal permite `\q` para encerramento. Uma segunda janela é aberta via emulador gráfico no Linux ou `Start-Process` no Windows.
+- `PrintService`: valida quantidade e consentimento, gera comprovantes numerados, orquestra o lote e registra sucesso **do envio ao spooler**. Não alega impressão física concluída.
+- `UsbMonitorAdapter`: lê `sysfs` (Linux) ou PnP via CIM (Windows). Nenhum acesso elétrico ou envio de dados pela USB.
+- `PrintAdapter`: enfileira tarefas normais via CUPS/Out-Printer, ou RAW ESC/POS somente com confirmação de compatibilidade e guilhotina. Windows RAW usa WinSpool via C# P/Invoke, compilado localmente pelo `Add-Type`.
+- `config/report.schema.json` permanece em `schemaVersion=2.0`. As novas operações são testes com IDs `usb_monitor`/`print_batch` nos resultados da sessão; evidências completas são arquivos adicionais junto do laudo.
+
+### Garantias e limitações
+
+- Saída por `\q` termina a sessão e fecha a **janela secundária**; Linux exige ENTER, Windows reconhece diretamente. Falhas abruptas de energia ou encerramento forçado podem impedir geração dos laudos finais.
+- A sondagem de dispositivos é periódica e pode perder eventos breves, sem medir estabilidade de sinal.
+- A impressão RAW não é convertida por driver: depende de fila e firmware ESC/POS compatíveis. Com `--cut-after-each`, o comando `GS V` é inserido **após cada comprovante**.
+- Máximo de 100 comprovantes; impressão/corte jamais iniciados durante os testes automatizados (adapters mockados).
+- Hardware real Windows e impressoras físicas permanecem pendentes de homologação.
+
+### Adaptadores de terminal (v2.1.0, atualização de compatibilidade)
+
+- No Linux, a seleção de emulador ocorre em `Adapters/TerminalAdapter.sh`, com detecção preferencial de `kgx` (GNOME Console) e suporte aos terminais anteriores. A opção `--usb-terminal` permite escolher explicitamente a interface.
+- No Windows, `WindowsTerminalAdapter.ps1` prepara uma chamada segura via `-EncodedCommand` (UTF-16LE), permitindo iniciar a sessão USB em **PowerShell 7** ou **CMD**. `OnSiteSuite.cmd` é apenas um ponto de entrada para CMD; o motor continua sendo PowerShell 7.
+- O coletor de eventos e gerador de laudos continuam na Service Layer, independente do terminal escolhido.

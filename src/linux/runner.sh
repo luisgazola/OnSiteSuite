@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Thin CLI entrypoint, v2.0.3. Sem lógica de negócio, apresentação ou persistência.
+# Thin CLI entrypoint, v2.1.0. Sem lógica de negócio, apresentação ou persistência.
 set -Eeuo pipefail
 umask 077
 ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"

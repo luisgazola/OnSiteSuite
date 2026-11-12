@@ -24,9 +24,9 @@ if ons_catalog_validate "$catalog" 'system,' >/dev/null 2>&1; then
 fi
 
 fixture='{"sistemaOperacional":"Test","numeroSerie":"NE","serviceTag":"NE","marca":"Mock","modelo":"Mock","tipo":"Desktop","processador":"Fake","memoria":"8 GiB","armazenamento":"Nenhum"}'
-folder="$(ons_write_reports "$TMP/reports" '2.0.3' "$fixture" '<script> & Cia' '' '' '' 0 "$TMP/results.jsonl")"
+folder="$(ons_write_reports "$TMP/reports" '2.1.0' "$fixture" '<script> & Cia' '' '' '' 0 "$TMP/results.jsonl")"
 [[ -f "$folder/relatorio.json" && -f "$folder/relatorio.txt" && -f "$folder/relatorio.html" ]]
-jq -e '.version=="2.0.3" and .schemaVersion=="2.0" and .summary.total==2 and
+jq -e '.version=="2.1.0" and .schemaVersion=="2.0" and .summary.total==2 and
   .summary.ok==1 and .summary.inconclusivo==1 and .tests[1].id=="memory"' "$folder/relatorio.json" >/dev/null
 grep -Fq '&lt;script&gt;' "$folder/relatorio.html"
 ! grep -Fq '<script>alert(1)</script>' "$folder/relatorio.html"

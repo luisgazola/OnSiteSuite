@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.1.0 — USB contínuo e impressão avançada
+
+### Adicionado
+
+- Monitoramento USB em segundo terminal gráfico (Linux e Windows), com interrupção por `\q`, comparação por amostragem, registro de conexões/desconexões e `usb-eventos.jsonl` junto ao laudo JSON/TXT/HTML.
+- Execução limitada por amostras para testes supervisionados; intervalos configuráveis de 0,2–60 segundos.
+- Sequência de impressão numerada de 1, 3, 5 ou 1–100 comprovantes, com dados de equipamento, fabricante, modelo, autoria e texto de teste.
+- Modo RAW ESC/POS com comando de guilhotina após cada comprovante (`GS V 0` / `GS V 1`), com confirmação adicional de compatibilidade e consentimento.
+- Integração CUPS Linux e WinSpool RAW Windows; assistentes pelo menu (`u`, `p`) e parâmetros diretos.
+- Evidências `usb-eventos.jsonl` e `comprovante-impressao.txt`; testes de dispositivos e spooler simulados.
+
+### Compatibilidade e limites
+
+- IDs de diagnósticos anteriores, flags existentes e `schemaVersion: 2.0` preservados.
+- Impressão real e corte físico não homologados; spooler aceito não significa impressão concluída.
+- O Windows ainda requer testes PowerShell 7 e validação em equipamento físico.
+- Não foi incluída dependência de Python no produto; C# é usado somente na integração RAW WinSpool do Windows.
+
 ## 2.0.3 — Consolidação e limpeza arquitetural
 
 - Removidas importações em lote da base PowerShell e a dependência de `$global:FssState`.
@@ -47,3 +65,11 @@
 - Adicionados HTML com escape, JSON e TXT; medidas para reduzir execução não consentida.
 - Incluído módulo auxiliar C++20, fluxos de troubleshooting legados e smoke tests Linux.
 - Documentadas limitações de hardware e funcionalidades ainda não implementadas.
+
+## Atualização de compatibilidade de terminais (sem mudança de versão)
+
+- Linux GNOME: o monitor USB reconhece o **GNOME Console (`kgx`)** com `--usb-terminal kgx` e detecção automática preferencial.
+- Windows: entrada `OnSiteSuite.cmd` para Prompt de Comando, com PowerShell 7 como motor obrigatório.
+- Parâmetro `-UsbTerminal PowerShell|CMD|Auto` para escolher a janela do monitor, com transporte por `EncodedCommand` e sem interpolação de argumentos em comandos CMD.
+- Preservados o número **2.1.0**, o contrato JSON `schemaVersion=2.0`, os relatórios e os comandos de impressão.
+- `tests/terminal-linux.sh` acrescentado à suíte; `tests/terminal-windows.ps1` verifica geração de comandos sem hardware. Homologação gráfica física no Windows pendente.

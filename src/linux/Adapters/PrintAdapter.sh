@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-# Único adaptador que envia um job físico à impressora. Chamado apenas após --yes-print.
-ons_submit_print_job() { local queue="$1" file="$2"; lp -d "$queue" -t 'OnSiteSuite Teste' -- "$file"; }
+# Saída física explicitamente autorizada via spooler CUPS, sem execução de shell externo.
+ons_submit_print_job() { local queue="$1" file="$2" raw="$3"; if [[ "$raw" == 1 ]]; then lp -d "$queue" -o raw -t 'OnSiteSuite ESC/POS' -- "$file"; else lp -d "$queue" -t 'OnSiteSuite Teste' -- "$file"; fi; }
