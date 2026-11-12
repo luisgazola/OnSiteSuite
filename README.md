@@ -6,7 +6,7 @@
 
 **Um projeto da Excelsior Soluções em Tecnologia** · Desenvolvido por **Luís Gazola**
 
-![Versão](https://img.shields.io/badge/vers%C3%A3o-2.0.1-2563eb)
+![Versão](https://img.shields.io/badge/vers%C3%A3o-2.0.2-2563eb)
 ![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-16a34a)
 ![Linux](https://img.shields.io/badge/Linux-CLI%20testada-16a34a)
 ![Windows](https://img.shields.io/badge/Windows-homologa%C3%A7%C3%A3o%20pendente-f59e0b)
@@ -39,9 +39,10 @@ O programa funciona localmente, sem exigir conta, servidor, banco de dados, cont
 | **Administradores de sistemas** | Diagnósticos pontuais e execução por parâmetros em estações Linux/Windows. |
 | **Desenvolvedores e entusiastas** | Estudo e contribuição em automação, PowerShell, Bash, C++20, JSON Schema e arquitetura modular. |
 
-### De onde veio a versão 2.0.1?
+### Evolução e mudanças da versão 2.0.2
 
-O projeto evolui o [FieldServiceToolkit](https://github.com/luisgazola/OnSiteSuite) (antigo nome do repositório), originalmente baseado em **FieldServiceSuite v1.2.0**. A série 2.x unificou o catálogo e o formato dos relatórios para Linux e Windows. Na **v2.0.1**, a abertura ganhou a **identificação do equipamento antes do menu de testes**, com identidade visual e autoria da Excelsior Soluções.
+O projeto evolui o [FieldServiceToolkit](https://github.com/luisgazola/OnSiteSuite) (antigo nome do repositório), originalmente baseado em **FieldServiceSuite v1.2.0**. A série 2.x unificou o catálogo e o formato dos relatórios para Linux e Windows. Na **v2.0.1**, a abertura ganhou identificação do equipamento e a identidade da Excelsior Soluções.
+A **v2.0.2** reorganiza os executores em **MVC + Service Layer**, separando controlador, interface de terminal, serviços de diagnóstico/relatórios, contratos e adaptadores de sistema operacional. Mantém os mesmos IDs de testes, parâmetros da CLI e **schema JSON 2.0**.
 
 > **Estado do projeto:** a CLI e os testes automatizados Linux foram executados no ambiente de desenvolvimento. Há um adaptador PowerShell para Windows, mas ele **ainda precisa ser homologado em máquinas Windows reais**. O OnSiteSuite é uma ferramenta de apoio ao diagnóstico, não um certificador de integridade de hardware.
 
@@ -73,7 +74,7 @@ Ao iniciar sem argumentos em um terminal interativo, o programa apresenta o inve
 
 ```text
 ======================================================================
-  OnSiteSuite v2.0.1 | EXCELSIOR SOLUÇÕES
+  OnSiteSuite v2.0.2 | EXCELSIOR SOLUÇÕES
   Suíte de diagnóstico, troubleshooting e laudos de Field Service
   Autoria: Excelsior Soluções em Tecnologia
   Desenvolvedor: Luís Gazola
@@ -92,7 +93,7 @@ Ao iniciar sem argumentos em um terminal interativo, o programa apresenta o inve
   Dados ausentes não são estimados. Confira as etiquetas quando necessário.
 ======================================================================
 
---- MENU DE TESTES | OnSiteSuite v2.0.1 ---
+--- MENU DE TESTES | OnSiteSuite v2.0.2 ---
  1. [x] Identificação do sistema
  2. [x] Processador e temperaturas disponíveis
  3. [x] Memória RAM
@@ -146,16 +147,16 @@ bash --version | head -n 1
 jq --version
 ```
 
-**Instalação a partir do Git (versão específica):**
+**Instalação a partir do Git (após a publicação da tag `v2.0.2`):**
 
 ```bash
-git clone --branch v2.0.1 --depth 1 https://github.com/luisgazola/OnSiteSuite.git
+git clone --branch v2.0.2 --depth 1 https://github.com/luisgazola/OnSiteSuite.git
 cd OnSiteSuite
 chmod +x onsite.sh
 ./onsite.sh
 ```
 
-**Sem Git:** baixe o [ZIP do código-fonte v2.0.1](https://github.com/luisgazola/OnSiteSuite/archive/refs/tags/v2.0.1.zip), extraia e, no terminal, entre na pasta extraída (`OnSiteSuite-2.0.1`). Em seguida execute `chmod +x onsite.sh` e `./onsite.sh`.
+**Sem Git:** após a publicação da tag, baixe o [ZIP do código-fonte v2.0.2](https://github.com/luisgazola/OnSiteSuite/archive/refs/tags/v2.0.2.zip), extraia e, no terminal, entre na pasta extraída (`OnSiteSuite-2.0.2`). Em seguida execute `chmod +x onsite.sh` e `./onsite.sh`.
 
 **Dependências opcionais:**
 
@@ -177,17 +178,17 @@ Instale somente o que for necessário para o atendimento. Algumas leituras podem
 2. Abra o **PowerShell 7** e confira `pwsh --version`.
 3. Escolha **uma** das formas de obter o projeto:
 
-**Via Git:**
+**Via Git (após a publicação da tag `v2.0.2`):**
 
 ```powershell
-git clone --branch v2.0.1 --depth 1 https://github.com/luisgazola/OnSiteSuite.git
+git clone --branch v2.0.2 --depth 1 https://github.com/luisgazola/OnSiteSuite.git
 Set-Location .\OnSiteSuite
 ```
 
-**Via ZIP, sem Git:** baixe o [código-fonte v2.0.1](https://github.com/luisgazola/OnSiteSuite/archive/refs/tags/v2.0.1.zip), extraia e acesse a pasta pelo PowerShell 7, por exemplo:
+**Via ZIP, sem Git:** após a publicação da tag, baixe o [código-fonte v2.0.2](https://github.com/luisgazola/OnSiteSuite/archive/refs/tags/v2.0.2.zip), extraia e acesse a pasta pelo PowerShell 7, por exemplo:
 
 ```powershell
-Set-Location "$HOME\Downloads\OnSiteSuite-2.0.1"
+Set-Location "$HOME\Downloads\OnSiteSuite-2.0.2"
 ```
 
 Se a pasta foi extraída em outro local, ajuste o caminho. Para iniciar:
@@ -289,7 +290,7 @@ Reports/
                 └── relatorio.html
 ```
 
-- **JSON:** resultado estruturado para ferramentas, integrações e processamento posterior. Usa `schemaVersion: "2.0"`; a versão do programa é `2.0.1`.
+- **JSON:** resultado estruturado para ferramentas, integrações e processamento posterior. Usa `schemaVersion: "2.0"`; a versão do programa é `2.0.2`.
 - **TXT:** consulta rápida, histórico textual e leitura em qualquer editor.
 - **HTML:** laudo legível no navegador, inclusive offline, com dados do equipamento, evidências e recomendações.
 
@@ -318,17 +319,23 @@ Os arquivos podem conter **nome do cliente, hostname, IP, logs e número de sér
 OnSiteSuite/
 ├── onsite.sh                    # entrada da CLI Linux
 ├── OnSiteSuite.ps1              # entrada da CLI Windows
-├── VERSION                      # versão 2.0.1
+├── VERSION                      # versão 2.0.2
 ├── config/
 │   ├── tests.json              # catálogo compartilhado
 │   └── report.schema.json      # contrato JSON dos laudos
 ├── src/
-│   ├── linux/                 # coletor, execução e inventário Bash
-│   ├── windows/               # executor e inventário PowerShell/CIM
-│   └── Controllers/, Services/, Models/ ... # base modular legada
+│   ├── linux/
+│   │   ├── App/, Controllers/, Domain/
+│   │   ├── Services/, Views/, Adapters/
+│   │   └── runner.sh          # composição da CLI Linux
+│   ├── windows/
+│   │   ├── App/, Controllers/, Domain/
+│   │   ├── Services/, Views/, Adapters/
+│   │   └── Runner.ps1         # composição da CLI Windows
+│   └── Controllers/, Services/, Models/ ... # módulos PowerShell originais preservados
 ├── Config/ e KnowledgeBase/    # regras e fluxos herdados
 ├── native/                     # coletor auxiliar C++20 (opcional)
-├── tests/                      # verificações automatizadas Linux
+├── tests/                      # testes Linux + double de services no Windows
 ├── docs/                       # arquitetura, roadmap, segurança e histórico
 ├── scripts/                    # publicação e manutenção do projeto
 └── Reports/                    # saída local; conteúdo ignorado pelo Git
@@ -348,15 +355,45 @@ cmake --build build/native
 ./build/native/onsite-probe --json
 ```
 
-### Executar testes de desenvolvimento (Linux)
+### Executar testes automatizados (Linux)
 
 ```bash
 bash tests/check-catalog.sh
 bash tests/equipment-linux.sh
 bash tests/smoke-linux.sh
+bash tests/architecture-linux.sh
+bash tests/contract-linux.sh
 ```
 
 Leia também [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/ROADMAP.md`](docs/ROADMAP.md) e [`CHANGELOG.md`](CHANGELOG.md).
+
+### Executar teste arquitetural Windows (PowerShell 7)
+
+Em uma máquina **Windows real**, execute:
+
+```powershell
+pwsh -NoProfile -File ./tests/architecture-windows.ps1
+```
+
+Esse teste utiliza um coletor simulado; a homologação dos coletores CIM, USB, impressoras e serviços legados continua pendente.
+
+### Como a arquitetura se organiza
+
+```text
+OnSiteSuite.ps1 / onsite.sh
+       |
+Controllers (sessão, seleção e orquestração)
+  |                           +--> Views (painel, menu, checklist, mensagens)
+  +--> Services (catálogo, diagnósticos, troubleshooting, relatórios)
+          |                              |
+          +--> Domain (contrato de resultado)
+          +--> Adapters (Windows: CIM/PSM1; Linux: /proc, /sys, utilitários)
+               Compartilham config/tests.json e config/report.schema.json
+```
+
+Os arquivos `src/linux/runner.sh` e `src/windows/Runner.ps1` agora são lançadores finos; a implementação reside nas respectivas camadas `App`, `Controllers`, `Services`, `Views`, `Domain` e `Adapters`.
+O modelo de dependências no Windows utiliza **scriptblocks injetados pela Composition Root**; o Linux utiliza funções carregadas pela composição, com opções por invocação. A base PowerShell legada foi mantida para compatibilidade.
+Detalhes: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## 8. Segurança e privacidade
 
@@ -373,7 +410,7 @@ Consulte [`SECURITY.md`](SECURITY.md) e [`docs/SECURITY.md`](docs/SECURITY.md) p
 
 ## 9. Limitações conhecidas e próximos passos
 
-| Situação | Estado na v2.0.1 |
+| Situação | Estado na v2.0.2 |
 | --- | --- |
 | CLI Linux e testes automatizados de catálogo/inventário | **Executados no ambiente de desenvolvimento** |
 | CLI PowerShell para Windows | **Implementada; homologação em hardware real pendente** |
@@ -411,7 +448,7 @@ O projeto recomenda **Conventional Commits**, por exemplo `feat:`, `fix:`, `docs
 
 ## 12. Referências, autoria e licença
 
-**Projeto:** OnSiteSuite · **Versão:** `2.0.1`  
+**Projeto:** OnSiteSuite · **Versão:** `2.0.2`  
 **Empresa e identidade do produto:** **Excelsior Soluções em Tecnologia**  
 **Desenvolvedor:** **Luís Gazola** · [GitHub @luisgazola](https://github.com/luisgazola)  
 **Repositório oficial:** [github.com/luisgazola/OnSiteSuite](https://github.com/luisgazola/OnSiteSuite)
@@ -424,7 +461,7 @@ O código é disponibilizado sob a **[licença MIT](LICENSE)**, conforme o arqui
 
 <div align="center">
 
-**OnSiteSuite v2.0.1 · Diagnósticos mais organizados, evidências rastreáveis e foco no trabalho técnico de campo.**
+**OnSiteSuite v2.0.2 · Diagnósticos mais organizados, evidências rastreáveis e foco no trabalho técnico de campo.**
 
 [Repositório](https://github.com/luisgazola/OnSiteSuite) · [Histórico de alterações](CHANGELOG.md) · [Roadmap](docs/ROADMAP.md) · [Contribuir](CONTRIBUTING.md)
 

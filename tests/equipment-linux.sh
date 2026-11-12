@@ -24,7 +24,7 @@ ons_linux_memory() { printf '16.0 GiB'; }
 ons_linux_storage() { printf 'nvme0n1 512G'; }
 fixture="$(ons_collect_equipment)"
 jq -e '.serviceTag=="ABC1234" and .numeroSerie=="ABC1234" and .marca=="Dell Inc." and .tipo=="Notebook" and .sistemaOperacional=="Fedora Linux"' <<<"$fixture" >/dev/null
-panel="$(ons_show_equipment "$fixture" 2.0.1)"
+panel="$(ons_show_equipment "$fixture" 2.0.2)"
 grep -q 'Latitude 5550' <<<"$panel"
 # Equipamento não Dell não deve receber Service Tag inventada.
 ons_dmi() { case "$1" in sys_vendor) printf 'Lenovo' ;; product_serial) printf 'SER543' ;; esac; }
