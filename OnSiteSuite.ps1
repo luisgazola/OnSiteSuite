@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    OnSiteSuite v2.0.2 - Diagnóstico de Field Service para Windows.
+    OnSiteSuite v2.0.3 - Diagnóstico de Field Service para Windows.
 .DESCRIPTION
     Usa os serviços migrados de FieldServiceSuite 1.2.0. OS opcional.
 .EXAMPLE

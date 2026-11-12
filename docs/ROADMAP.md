@@ -32,3 +32,10 @@
 - Tela inicial com identificação local de equipamento no Linux e Windows (Windows pendente de homologação).
 - Inventário em relatórios JSON/TXT/HTML, com compatibilidade do schema 2.0.
 - Autoria e identidade Excelsior Soluções no terminal e laudos.
+
+## Atualização v2.0.3
+
+- Consolidação das camadas MVC + Service Layer e remoção do código PowerShell antigo concluídas na árvore de distribuição.
+- Interfaces públicas e contrato JSON v2 preservados; shims internos antigos descontinuados.
+- C++20 poderá retornar apenas se houver uma necessidade concreta de coleta de baixo nível não atendida pelos adaptadores atuais.
+- Prioridade de qualidade: executar testes PowerShell mockados e validar em máquinas Windows reais antes de comercializar como ferramenta homologada.

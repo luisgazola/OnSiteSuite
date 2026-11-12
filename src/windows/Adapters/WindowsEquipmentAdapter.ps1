@@ -1,4 +1,4 @@
-# OnSiteSuite 2.0.2 — identificação de equipamento via CIM (somente leitura).
+# OnSiteSuite 2.0.3 — identificação de equipamento via CIM (somente leitura).
 # As consultas podem falhar em algumas políticas empresariais: nenhum campo é estimado.
 function Get-OnsSafeCim([string]$ClassName) {
   try { return (Get-CimInstance -ClassName $ClassName -ErrorAction Stop | Select-Object -First 1) }

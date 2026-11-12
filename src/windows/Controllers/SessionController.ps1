@@ -19,7 +19,6 @@ function Start-OnsWindows {
    if ([string]::IsNullOrWhiteSpace($Tests)) { throw 'Nenhum teste selecionado.' }
  }
  $ids = @(Resolve-OnsTests -Catalog $catalog -Tests $Tests -All $All)
- Initialize-OnsLegacy -RootPath $RootPath
  $options = [pscustomobject]@{Online=$Online;NonInteractive=$NonInteractive;Symptom=$Symptom;RootPath=$RootPath}
  $results = @(Invoke-OnsDiagnostics -Ids $ids -Catalog $catalog -Probe $Dependencies.Probe -Progress $Dependencies.Progress -Options $options)
  $session = [pscustomobject]@{

@@ -1,6 +1,6 @@
 # Composition root PowerShell: constrói dependências reais (scriptblocks), e não string aliases.
 . (Join-Path $PSScriptRoot '../Domain/DiagnosticResult.ps1')
-. (Join-Path $PSScriptRoot '../Adapters/LegacyPowerShellAdapter.ps1')
+. (Join-Path $PSScriptRoot '../Adapters/WindowsDiagnosticAdapter.ps1')
 . (Join-Path $PSScriptRoot '../Adapters/WindowsProbeAdapter.ps1')
 . (Join-Path $PSScriptRoot '../Adapters/WindowsEquipmentAdapter.ps1')
 . (Join-Path $PSScriptRoot '../Services/CatalogService.ps1')

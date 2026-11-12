@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.0.3 — Consolidação e limpeza arquitetural
+
+- Removidas importações em lote da base PowerShell e a dependência de `$global:FssState`.
+- Migradas as quatro funcionalidades legadas ativas (hardware/desempenho, discos, bateria e drivers) para `src/windows/Adapters/WindowsDiagnosticAdapter.ps1`, sem ações destrutivas.
+- Removidas as árvores PowerShell legadas e 19 documentos históricos da distribuição; histórico Git permanece íntegro.
+- Centralizado o fluxo de troubleshooting em `config/troubleshooting-flows.json` para Linux e Windows, eliminando `Config/` e `KnowledgeBase/` duplicadas.
+- Removidos os pontos de entrada de compatibilidade `Start.ps1`, `src/linux/probes.sh`, `src/linux/equipment.sh` e `src/windows/Equipment.ps1`. As CLIs públicas permanecem.
+- Removido o componente C++ opcional, que não participava do fluxo principal e duplicava inventário; permanece recuperável no histórico Git.
+- Adicionados teste de limpeza, teste de troubleshooting e testes Windows com CIM simulado (necessitam execução no PowerShell 7).
+- Preservados comandos, IDs do catálogo e schemaVersion 2.0 nos relatórios JSON/TXT/HTML.
+- Validados Linux e testes de regressão; Windows real continua pendente de homologação.
+
+
 ## 2.0.2 — Refatoração MVC + Service Layer
 
 - Reorganizados os executores Linux e Windows em **App, Controllers, Domain, Services, Views e Adapters**.

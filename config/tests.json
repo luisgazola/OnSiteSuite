@@ -16,6 +16,6 @@
     {"id":"logs","title":"Erros recentes do sistema","kind":"read-only"},
     {"id":"security","title":"Indicadores de segurança do sistema","kind":"read-only"},
     {"id":"checklist","title":"Checklist físico manual","kind":"interactive"},
-    {"id":"troubleshooting","title":"Fluxo guiado por sintoma (base legada)","kind":"guided"}
+    {"id":"troubleshooting","title":"Fluxo guiado por sintoma (orientativo)","kind":"guided"}
   ]
 }

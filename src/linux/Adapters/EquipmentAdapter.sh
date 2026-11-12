@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# OnSiteSuite 2.0.2 — coletor de identificação somente leitura.
+# OnSiteSuite 2.0.3 — coletor de identificação somente leitura.
 # Dependências: Bash, jq; utilitários básicos quando presentes. Sem rede/elevação.
 
 ons_clean() {

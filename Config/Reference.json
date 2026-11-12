@@ -1,6 +1,0 @@
-{
-  "cpuUsage": { "okMax": 75, "warningMax": 90 },
-  "ramUsage": { "okMax": 75, "warningMax": 90 },
-  "diskFreePercent": { "warningBelow": 15, "criticalBelow": 8 },
-  "batteryWear": { "okMax": 20, "warningMax": 35 }
-}

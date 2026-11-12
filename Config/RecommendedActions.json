@@ -1,7 +1,0 @@
-{
-  "ram_alta": "Verificar processos, inicialização automática e considerar upgrade quando aplicável.",
-  "cpu_alta": "Identificar processo consumidor e validar temperatura.",
-  "driver_erro": "Coletar Hardware ID e reinstalar driver pelo fabricante ou imagem corporativa.",
-  "rede_falha": "Validar IP, gateway, DNS, cabo/Wi-Fi e política local.",
-  "disco_alerta": "Orientar backup, registrar evidência e recomendar substituição."
-}

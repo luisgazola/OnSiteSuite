@@ -1,29 +1,29 @@
-# Adapter de diagnóstico Windows: CIM, cmdlets de inventário e serviços legados.
+# Adapter de diagnóstico Windows: CIM, cmdlets de inventário e coletores explícitos do OnSiteSuite.
 # Converte cada resultado para o contrato de domínio; não contém UI nem persistência.
 function Invoke-OnsWindowsProbe {
  param([string]$Id,[string]$Title,[bool]$Online,[bool]$NonInteractive,[string]$Symptom,[string]$RootPath,[scriptblock]$ChecklistPrompt)
  try {
   switch ($Id) {
    'system' {
-    $h=Get-FssHardwareInfo
+    $h=Get-OnsHardwareSnapshot
     if ($h.PSObject.Properties['Erro']) { return (New-OnsWindowsResult $Id $Title 'INCONCLUSIVO' 'Inventário indisponível' $h) }
     return (New-OnsWindowsResult $Id $Title 'OK' 'Inventário do computador coletado' $h)
    }
    'cpu' {
-    $h=Get-FssHardwareInfo; $p=Get-FssPerformanceInfo
+    $h=Get-OnsHardwareSnapshot; $p=Get-OnsPerformanceSnapshot
     if ($p.PSObject.Properties['Erro']) { return (New-OnsWindowsResult $Id $Title 'INCONCLUSIVO' 'Métricas de CPU indisponíveis' $p) }
     $summary="CPU: $($h.CPU); uso pontual: $($p.CpuUsoPercent)% (temperatura não medida)"
     $status= if ($null -eq $p.CpuUsoPercent) {'INCONCLUSIVO'} elseif ($p.CpuUsoPercent -ge 90) {'ATENCAO'} else {'OK'}
     return (New-OnsWindowsResult $Id $Title $status $summary $p @('Uso elevado isolado não prova falha de hardware.'))
    }
    'memory' {
-    $p=Get-FssPerformanceInfo
+    $p=Get-OnsPerformanceSnapshot
     if ($p.PSObject.Properties['Erro']) { return (New-OnsWindowsResult $Id $Title 'INCONCLUSIVO' 'Memória não analisável' $p) }
     $status=if ($null -eq $p.RamUsoPercent) {'INCONCLUSIVO'} elseif ($p.RamUsoPercent -ge 90) {'ATENCAO'} else {'OK'}
     return (New-OnsWindowsResult $Id $Title $status "Uso pontual de RAM: $($p.RamUsoPercent)% (não é teste de integridade)." $p)
    }
    'storage' {
-    $s=Get-FssStorageInfo
+    $s=Get-OnsStorageSnapshot
     if ($s.PSObject.Properties['Erro']) { return (New-OnsWindowsResult $Id $Title 'INCONCLUSIVO' 'Inventário de armazenamento indisponível' $s) }
     return (New-OnsWindowsResult $Id $Title 'OK' 'Volumes e discos identificados; saúde física deve ser avaliada à parte' $s)
    }
@@ -38,7 +38,7 @@ function Invoke-OnsWindowsProbe {
     return (New-OnsWindowsResult $Id $Title $status 'Estado informado pelo subsistema Windows; não equivale a leitura SMART completa.' $disks @('Verificar atributos SMART com ferramenta compatível do fabricante quando necessário.'))
    }
    'battery' {
-    $b=Get-FssBatteryInfo
+    $b=Get-OnsBatterySnapshot
     if ($b.PSObject.Properties['Erro']) {return (New-OnsWindowsResult $Id $Title 'INCONCLUSIVO' 'Bateria não analisável' $b)}
     if (-not $b.Presente) {return (New-OnsWindowsResult $Id $Title 'NAO_SUPORTADO' 'Nenhuma bateria identificada' $b)}
     return (New-OnsWindowsResult $Id $Title 'OK' 'Carga da bateria lida; ciclos e desgaste exigem interfaces adicionais' $b)
@@ -67,7 +67,7 @@ function Invoke-OnsWindowsProbe {
     return (New-OnsWindowsResult $Id $Title 'OK' 'Filas consultadas; impressão e guilhotina não acionadas' $printers)
    }
    'drivers' {
-    $issues=@(Get-FssDriverIssues)
+    $issues=@(Get-OnsDriverIssues)
     $real=@($issues | Where-Object { $_.DeviceID -or $_.ConfigManagerErrorCode })
     if ($issues.Count -gt 0 -and $null -ne $issues[0] -and $issues[0].PSObject.Properties['Erro']) {return (New-OnsWindowsResult $Id $Title 'INCONCLUSIVO' 'Verificação de drivers falhou' $issues)}
     if ($real.Count -gt 0) {return (New-OnsWindowsResult $Id $Title 'ATENCAO' "$($real.Count) dispositivo(s) com erro de configuração" $real)}
@@ -100,7 +100,7 @@ function Invoke-OnsWindowsProbe {
     $key=$Symptom.Replace(' ','_').ToLowerInvariant()
     if ($key -eq 'lento') {$key='notebook_lento'}
     if ($key -eq 'rede' -or $key -eq 'wifi') {$key='sem_internet'}
-    $flows=Get-Content -Raw -Encoding UTF8 (Join-Path $RootPath 'Config/TroubleshootingFlows.json') | ConvertFrom-Json
+    $flows=Get-Content -Raw -Encoding UTF8 (Join-Path $RootPath 'config/troubleshooting-flows.json') | ConvertFrom-Json
     $prop=$flows.PSObject.Properties[$key]
     if ($null -eq $prop) {return (New-OnsWindowsResult $Id $Title 'INCONCLUSIVO' 'Sintoma sem fluxo definido' $Symptom)}
     $steps=@($prop.Value)

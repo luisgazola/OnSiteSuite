@@ -15,26 +15,23 @@ O OnSiteSuite é um projeto de automação, diagnóstico e documentação para F
 - `Views`: menu, terminal e checklist; sem acesso direto a hardware/arquivos de laudo.
 - `Services`: orquestração dos diagnósticos e relatórios; sem tela interativa.
 - `Domain`: contratos, modelos e estados.
-- `Adapters`: coleta do sistema operacional e integração com código legado.
+- `Adapters`: coleta do sistema operacional e interfaces próprias da plataforma.
 
-Mantenha Windows e Linux em paridade de contrato. Reutilize a base legada PowerShell por adapters em vez de duplicar código.
+Mantenha Windows e Linux em paridade de contrato. Não reintroduza `src/Services` ou a inicialização `FssState`. Implemente coletores por adaptadores explícitos e preserve o contrato JSON 2.0.
 
 ## Testar
 
 Linux:
 
 ```bash
-bash tests/check-catalog.sh
-bash tests/equipment-linux.sh
-bash tests/smoke-linux.sh
-bash tests/architecture-linux.sh
-bash tests/contract-linux.sh
+bash tests/run-linux.sh
 ```
 
 Windows com PowerShell 7:
 
 ```powershell
 pwsh -NoProfile -File ./tests/architecture-windows.ps1
+pwsh -NoProfile -File ./tests/adapters-windows.ps1
 ```
 
 Testes de impressoras, USB, SMART e bateria exigem registro de hardware e consentimento, nunca automatize ações físicas nos pipelines CI.

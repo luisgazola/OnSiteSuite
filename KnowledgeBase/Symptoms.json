@@ -1,4 +1,0 @@
-{
-  "notebook lento": ["RAM", "CPU", "Disco", "Inicialização", "Drivers", "Eventos"],
-  "sem internet": ["Adaptador", "IP", "Gateway", "DNS", "Driver de rede"]
-}

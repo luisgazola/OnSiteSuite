@@ -6,7 +6,7 @@ TMP="$(mktemp -d)"
 trap 'rm -rf -- "$TMP"' EXIT
 command -v jq >/dev/null
 "$ROOT/onsite.sh" --info > "$TMP/info"
-grep -q 'OnSiteSuite v2.0.2 | EXCELSIOR' "$TMP/info"
+grep -q 'OnSiteSuite v2.0.3 | EXCELSIOR' "$TMP/info"
 grep -q 'IDENTIFICAÇÃO DO EQUIPAMENTO' "$TMP/info"
 "$ROOT/onsite.sh" --list-tests | grep -q '^cpu'
 "$ROOT/onsite.sh" --tests system,memory,usb,printer \
@@ -14,7 +14,7 @@ grep -q 'IDENTIFICAÇÃO DO EQUIPAMENTO' "$TMP/info"
   --output "$TMP/reports" --quiet > "$TMP/output"
 folder="$(cat "$TMP/output")"
 [[ -f "$folder/relatorio.json" && -f "$folder/relatorio.html" && -f "$folder/relatorio.txt" ]]
-jq -e '.product=="OnSiteSuite" and .version=="2.0.2" and .schemaVersion=="2.0" and .equipamento.sistemaOperacional and .equipamento.marca and .equipamento.numeroSerie and .summary.total==4 and (.tests|length==4)' "$folder/relatorio.json" >/dev/null
+jq -e '.product=="OnSiteSuite" and .version=="2.0.3" and .schemaVersion=="2.0" and .equipamento.sistemaOperacional and .equipamento.marca and .equipamento.numeroSerie and .summary.total==4 and (.tests|length==4)' "$folder/relatorio.json" >/dev/null
 jq -e '.tests | all(.status=="OK" or .status=="INCONCLUSIVO" or .status=="ATENCAO" or .status=="NAO_SUPORTADO" or .status=="FALHA")' "$folder/relatorio.json" >/dev/null
 # User-provided HTML must be encoded.
 grep -q '&lt;script&gt;' "$folder/relatorio.html"

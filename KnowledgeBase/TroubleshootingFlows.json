@@ -1,5 +1,0 @@
-{
-  "notebook_lento": ["RAM", "CPU", "Disco/SMART", "Espaço livre", "Inicialização", "Drivers", "Conclusão"],
-  "sem_internet": ["Adaptador ativo", "IP", "Gateway", "DNS", "Ping externo", "Driver de rede", "Conclusão"],
-  "bateria": ["Carga", "Carregador", "Capacidade", "Autonomia", "Energia", "Conclusão"]
-}

@@ -1,5 +1,0 @@
-{
-  "HighMemory": "Verificar processos em execução, inicialização automática e considerar upgrade de RAM.",
-  "StorageAlert": "Orientar backup, validar SMART e considerar substituição do disco.",
-  "DriverError": "Identificar Hardware ID e reinstalar driver oficial do fabricante."
-}

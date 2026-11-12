@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ons_usage() {
 cat <<'HELP'
-OnSiteSuite 2.0.2 — diagnóstico local Linux | Excelsior Soluções
+OnSiteSuite 2.0.3 — diagnóstico local Linux | Excelsior Soluções
 Uso: ./onsite.sh [opções]
   --list-tests                 Lista códigos de testes disponíveis
   --info                       Exibe identificação do equipamento e sai

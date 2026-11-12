@@ -1,4 +1,4 @@
-# Security policy — OnSiteSuite 2.0.0
+# Security policy — OnSiteSuite v2.x
 
 Please report vulnerabilities privately to the project owner through the repository's security advisory channel, if configured. Do not post sensitive host logs, client data, or serial numbers in a public issue.
 

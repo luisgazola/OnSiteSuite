@@ -1,9 +1,0 @@
-{
-  "appName": "OnSiteSuite",
-  "version": "2.0.0",
-  "language": "pt-BR",
-  "portableMode": true,
-  "offlineFirst": true,
-  "osRequired": false,
-  "defaultMode": "read-only"
-}

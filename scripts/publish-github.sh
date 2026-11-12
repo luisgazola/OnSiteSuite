@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# OnSiteSuite v2.0.2 — release sobre o repositório renomeado (sem perda do histórico).
+# OnSiteSuite v2.0.3 — release sobre o repositório renomeado (sem perda do histórico).
 set -Eeuo pipefail
 SRC="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO='https://github.com/luisgazola/OnSiteSuite.git'
@@ -9,7 +9,7 @@ DEST="${PUBLISH_DIR:-$(dirname "$SRC")/OnSiteSuite-release-$VERSION}"
 for command_name in git jq rsync bash; do
   command -v "$command_name" >/dev/null || { echo "Dependência ausente: $command_name" >&2; exit 1; }
 done
-[[ "$VERSION" == '2.0.2' ]] || { echo 'Este script publica somente v2.0.2' >&2; exit 1; }
+[[ "$VERSION" == '2.0.3' ]] || { echo 'Este script publica somente v2.0.3' >&2; exit 1; }
 [[ ! -e "$DEST" ]] || { echo "Destino já existe: $DEST" >&2; exit 1; }
 if ! git var GIT_AUTHOR_IDENT >/dev/null 2>&1 || ! git var GIT_COMMITTER_IDENT >/dev/null 2>&1; then
   echo 'Configure git user.name e user.email antes de publicar.' >&2; exit 1
@@ -34,8 +34,8 @@ git add -A
 git -c core.whitespace=-blank-at-eol diff --cached --check
 if git diff --cached --quiet; then echo 'Nenhuma modificação em relação à main.' >&2; exit 1; fi
 git diff --cached --stat
-git commit -m "refactor: separate MVC Service Layer and OS adapters on OnSiteSuite v$VERSION"
-git tag -a "$TAG" -m "OnSiteSuite v$VERSION — MVC + Service Layer refactoring"
+git commit -m "refactor: remove legacy code and consolidate OnSiteSuite v$VERSION"
+git tag -a "$TAG" -m "OnSiteSuite v$VERSION — codebase consolidation"
 git push origin main
 git push origin "$TAG"
 printf '\nPublicado: https://github.com/luisgazola/OnSiteSuite (main, %s)\n' "$TAG"

@@ -2,7 +2,8 @@
 set -Eeuo pipefail
 ROOT="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 # Funções de coleta aceitam ausência de dados, sem precisar de root ou hardware real.
-source "$ROOT/src/linux/equipment.sh"
+source "$ROOT/src/linux/Adapters/EquipmentAdapter.sh"
+source "$ROOT/src/linux/Views/EquipmentView.sh"
 [[ "$(ons_chassis_type 13)" == 'AIO (All-in-One)' ]]
 [[ "$(ons_chassis_type 9)" == 'Notebook' ]]
 [[ "$(ons_chassis_type 3)" == 'Desktop' ]]
@@ -24,7 +25,7 @@ ons_linux_memory() { printf '16.0 GiB'; }
 ons_linux_storage() { printf 'nvme0n1 512G'; }
 fixture="$(ons_collect_equipment)"
 jq -e '.serviceTag=="ABC1234" and .numeroSerie=="ABC1234" and .marca=="Dell Inc." and .tipo=="Notebook" and .sistemaOperacional=="Fedora Linux"' <<<"$fixture" >/dev/null
-panel="$(ons_show_equipment "$fixture" 2.0.2)"
+panel="$(ons_show_equipment "$fixture" 2.0.3)"
 grep -q 'Latitude 5550' <<<"$panel"
 # Equipamento não Dell não deve receber Service Tag inventada.
 ons_dmi() { case "$1" in sys_vendor) printf 'Lenovo' ;; product_serial) printf 'SER543' ;; esac; }

@@ -10,7 +10,7 @@ probe_troubleshooting() {
     'notebook lento'|'lentidao'|'lento') symptom='notebook_lento' ;;
     'sem internet'|'wifi'|'rede') symptom='sem_internet' ;;
   esac
-  steps="$(jq -r --arg symptom "$symptom" '.[$symptom] // empty | if type=="array" then to_entries | map("\(.key+1). \(.value)") | join("\n") else "" end' "$ROOT_DIR/Config/TroubleshootingFlows.json")"
+  steps="$(jq -r --arg symptom "$symptom" '.[$symptom] // empty | if type=="array" then to_entries | map("\(.key+1). \(.value)") | join("\n") else "" end' "$ROOT_DIR/config/troubleshooting-flows.json")"
   if [[ -z "$steps" ]]; then
     make_result "INCONCLUSIVO" "Sintoma sem fluxo específico na base de conhecimento" "Sintoma: $SYMPTOM" 'Defina novo fluxo e revise com o responsável técnico.'
   else
