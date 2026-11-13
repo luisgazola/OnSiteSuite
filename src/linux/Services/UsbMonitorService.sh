@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Serviço de monitoramento USB: compara snapshots sem modificar hardware.
 ons_monitor_usb_foreground() {
- local root="$1" out="$2" version="$3" interval="$4" max_samples="$5"
+ local root="$1" out="$2" version="$3" interval="$4" max_samples="$5" launch_ack="${6:-}"
  local work prev curr events resultfile equipment folder input pending="" item samples=0 connected=0 disconnected=0
  local current_count status summary details
  [[ -t 0 && -t 1 || "$max_samples" -gt 0 ]] || {
@@ -13,6 +13,10 @@ ons_monitor_usb_foreground() {
  : > "$events"; : > "$resultfile"
  ons_usb_snapshot > "$prev"
  current_count="$(wc -l < "$prev")"
+ # Ack usado apenas pelo lançador gráfico para não reportar sucesso falso.
+ if [[ -n "$launch_ack" ]]; then
+   ( umask 077; : > "$launch_ack" ) || printf 'Aviso: falha ao confirmar abertura da sessão USB.\n' >&2
+ fi
  ons_usb_event "$events" 'INICIO' "Dispositivos iniciais: $current_count"
  printf '\n=== OnSiteSuite v%s | EXCELSIOR SOLUÇÕES ===\n' "$version"
  printf 'MONITOR USB CONTINUO · Intervalo: %ss\n' "$interval"

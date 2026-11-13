@@ -4,7 +4,7 @@ ons_main() {
  local ROOT_DIR="$1"; shift
  local VERSION catalog DEFAULT ONLINE=0 LIST=0 INFO_ONLY=0 SHOW_INFO=0 INTERACTIVE=0 ALL=0
  local PRINT_QUEUE='' CONFIRM_PRINT=0 PRINT_COUNT=1 PRINT_BRAND='Não identificado' PRINT_MODEL='Não identificado' PRINT_RAW=0 PRINT_CUT=0 CONFIRM_CUT=0 CUT_MODE='full' PRINT_COUNT_GIVEN=0
- local USB_MONITOR=0 USB_FOREGROUND=0 USB_INTERVAL=1 USB_SAMPLES=0 USB_TERMINAL='auto' TESTS='' CLIENT='' TICKET='' TECHNICIAN='' SERIAL='' SYMPTOM=''
+ local USB_MONITOR=0 USB_FOREGROUND=0 USB_INTERVAL=1 USB_SAMPLES=0 USB_TERMINAL='auto' USB_LAUNCH_ACK='' TESTS='' CLIENT='' TICKET='' TECHNICIAN='' SERIAL='' SYMPTOM=''
  local OUT="$ROOT_DIR/Reports" QUIET=0 EQUIPMENT_JSON TMP results_file folder
  VERSION="$(tr -d '\r\n' < "$ROOT_DIR/VERSION")"
  catalog="$ROOT_DIR/config/tests.json"
@@ -16,11 +16,12 @@ ons_main() {
    --online) ONLINE=1; shift ;; --yes-print) CONFIRM_PRINT=1; shift ;; --quiet) QUIET=1; shift ;;
    --usb-monitor) USB_MONITOR=1; shift ;; --foreground) USB_FOREGROUND=1; shift ;;
    --escpos-raw) PRINT_RAW=1; shift ;; --cut-after-each) PRINT_CUT=1; shift ;; --yes-cut) CONFIRM_CUT=1; shift ;;
-   --tests|--client|--ticket|--technician|--serial|--symptom|--output|--print-test|--print-count|--print-brand|--print-model|--cut-mode|--usb-interval|--usb-samples|--usb-terminal)
+   --usb-launch-ack|--tests|--client|--ticket|--technician|--serial|--symptom|--output|--print-test|--print-count|--print-brand|--print-model|--cut-mode|--usb-interval|--usb-samples|--usb-terminal)
       (($#>=2)) || { printf 'Faltou valor para %s\n' "$1" >&2; return 2; }
       case "$1" in
        --tests) TESTS="$2" ;; --client) CLIENT="$2" ;; --ticket) TICKET="$2" ;;
        --technician) TECHNICIAN="$2" ;; --serial) SERIAL="$2" ;; --symptom) SYMPTOM="$2" ;;
+       --usb-launch-ack) USB_LAUNCH_ACK="$2" ;;
        --output) OUT="$2" ;; --print-test) PRINT_QUEUE="$2" ;;
        --print-count) PRINT_COUNT="$2"; PRINT_COUNT_GIVEN=1 ;; --print-brand) PRINT_BRAND="$2" ;;
        --print-model) PRINT_MODEL="$2" ;; --cut-mode) CUT_MODE="$2" ;;
@@ -38,7 +39,7 @@ ons_main() {
    printf 'Intervalo USB inválido (0.2..60 segundos).\n' >&2; return 2
  fi
  if ((USB_MONITOR)); then
-   if ((USB_FOREGROUND)); then ons_monitor_usb_foreground "$ROOT_DIR" "$OUT" "$VERSION" "$USB_INTERVAL" "$USB_SAMPLES"
+   if ((USB_FOREGROUND)); then ons_monitor_usb_foreground "$ROOT_DIR" "$OUT" "$VERSION" "$USB_INTERVAL" "$USB_SAMPLES" "$USB_LAUNCH_ACK"
    else ons_launch_usb_terminal "$ROOT_DIR" "$OUT" "$USB_INTERVAL" "$USB_SAMPLES" "$USB_TERMINAL"; fi
    return $?
  fi
@@ -73,7 +74,10 @@ ons_main() {
    while :; do
      if ! ons_select_tests "$TESTS" "$VERSION" "$catalog"; then return 0; fi
      case "${ONS_MENU_ACTION:-tests}" in
-       usb) ons_launch_usb_terminal "$ROOT_DIR" "$OUT" "$USB_INTERVAL" "$USB_SAMPLES" "$USB_TERMINAL" || true; continue ;;
+       usb) if ! ons_launch_usb_terminal "$ROOT_DIR" "$OUT" "$USB_INTERVAL" "$USB_SAMPLES" "$USB_TERMINAL"; then
+               printf 'Não foi possível abrir uma segunda janela. Verifique o erro acima ou use --foreground.\n' >&2
+             fi
+             continue ;;
        print)
          if ! ons_prompt_print_batch; then continue; fi
          PRINT_QUEUE="$ONS_PRINT_QUEUE"; PRINT_COUNT="$ONS_PRINT_COUNT"; PRINT_BRAND="$ONS_PRINT_BRAND";

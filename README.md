@@ -124,12 +124,16 @@ Em uma sessão sem ambiente gráfico, ou para acompanhar no terminal atual:
 ./onsite.sh --usb-monitor --foreground
 ```
 
+Se pressionar **`u`** no menu, o programa agora aguarda confirmação da inicialização do monitor e apresenta erros da janela gráfica em vez de indicar sucesso sem verificação. Se não abrir, experimente `kgx --version` e execute `./onsite.sh --usb-monitor --foreground` para diagnosticar sem outra janela. O lançador armazena um log temporário quando não consegue abrir o terminal.
+
 A aplicação registra as alterações de dispositivos USB identificadas por amostragem (padrão **1 segundo**). **Na janela do monitor, digite `\q` e pressione ENTER**. Isso encerra a coleta, gera o laudo e fecha a janela secundária (quando aberta pelo aplicativo). A janela principal permanece disponível.
 
 ```bash
 ./onsite.sh --usb-monitor --usb-interval 0.5
 ./onsite.sh --usb-monitor --foreground --usb-interval 2 --output "$HOME/Laudos"
 ```
+
+**Compatibilidade KGX (Gentoo/GNOME):** a abertura gráfica usa `kgx -- bash ...`, passando os parâmetros individualmente. Evita o erro `Faltando argumento para o --command` observado em algumas versões do GNOME Console. A confirmação de abertura continua baseada no serviço USB. Se houver erro na sessão gráfica, use `./onsite.sh --usb-monitor --foreground`.
 
 Para coleta limitada e testes automatizados: `--usb-monitor --foreground --usb-samples 10` (dez intervalos). O monitor não mede tensão, qualidade de sinal, taxa de erros USB ou perdas mais breves que o intervalo de amostragem.
 

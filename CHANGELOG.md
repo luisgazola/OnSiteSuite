@@ -1,5 +1,12 @@
 # Changelog
 
+## Correção do lançador USB v2.1.0 (sem mudança de versão)
+
+- Corrigida mensagem de sucesso indevida: monitor USB confirma sua inicialização antes da confirmação ao usuário.
+- Mensagens de erro do terminal gráfico deixam de ser descartadas, com caminho para arquivo de diagnóstico.
+- O atalho `u` informa o problema e sugere `--foreground` quando a nova janela não abre.
+- Adicionado teste de regressão para falha de inicialização do emulador.
+
 ## 2.1.0 — USB contínuo e impressão avançada
 
 ### Adicionado
@@ -73,3 +80,9 @@
 - Parâmetro `-UsbTerminal PowerShell|CMD|Auto` para escolher a janela do monitor, com transporte por `EncodedCommand` e sem interpolação de argumentos em comandos CMD.
 - Preservados o número **2.1.0**, o contrato JSON `schemaVersion=2.0`, os relatórios e os comandos de impressão.
 - `tests/terminal-linux.sh` acrescentado à suíte; `tests/terminal-windows.ps1` verifica geração de comandos sem hardware. Homologação gráfica física no Windows pendente.
+
+## Hotfix KGX (2.1.0, sem mudança de versão)
+
+- Corrigido `kgx --command "..."` para `kgx -- bash "${args[@]}"`, preservando o vetor de argumentos e evitando incompatibilidade de parsing do GNOME Console.
+- Teste de regressão recusa expressamente o formato antigo (`--command`) e valida a confirmação por arquivo de inicialização, sem anunciar sucesso falso.
+- Diagnóstico gráfico em equipamento Gentoo real depende de execução local; testes com emulador estrito aprovados.
