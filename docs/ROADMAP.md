@@ -47,3 +47,11 @@
 - Comando de corte ESC/POS após cada comprovante com confirmação de compatibilidade e autorização explícitas.
 - Testes Linux com sysfs e spooler simulados para eventos USB, impressão, contador e bytes de guilhotina.
 - Testes PowerShell mockados fornecidos para execução futura no Windows; sem homologação real na entrega.
+
+## Implementado na v2.2.0 (USB Diagnostic Lab — primeira entrega)
+
+- Resumos estruturados por dispositivo e sessões comparativas opcionais, preservando coleta offline por amostragem.
+- Reconexões identificadas por desconexão observada e conexão posterior da mesma chave na sessão.
+- Windows: relatório por PnP Device ID e VID/PID extraído do identificador quando disponível; porta física **não é inferida**.
+- Linux: topologia/VID/PID extraídos do snapshot sysfs.
+- Continuam planejados como incrementos futuros: mecanismo de notificação nativa de eventos, diagnóstico de erros de controlador USB e medições mais profundas somente quando as APIs disponibilizarem dados confiáveis.

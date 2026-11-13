@@ -4,6 +4,7 @@ Set-StrictMode -Version Latest
 $root=Split-Path -Parent $PSScriptRoot
 . (Join-Path $root 'src/windows/Domain/DiagnosticResult.ps1')
 . (Join-Path $root 'src/windows/Services/PrintService.ps1')
+. (Join-Path $root 'src/windows/Services/UsbAnalysisService.ps1')
 . (Join-Path $root 'src/windows/Services/UsbMonitorService.ps1')
 $script:lastBytes=@()
 $script:submitCalls=0

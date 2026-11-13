@@ -39,3 +39,8 @@ Testes de impressoras, USB, SMART e bateria exigem registro de hardware e consen
 ## Pull requests
 
 Crie uma branch (por exemplo, `refactor/windows-report-service`), documente alterações e evidências de teste, siga Conventional Commits (`feat:`, `fix:`, `refactor:`, `test:`, `docs:`) e não inclua `Reports/`, logs, arquivos `.env`, chaves nem dados de clientes. Consulte `SECURITY.md` para reporte responsável.
+
+
+### Testes da v2.2.0
+
+No Linux: `bash tests/run-linux.sh`. No Windows com PowerShell 7: `pwsh -NoProfile -File .\tests\run-windows.ps1`. Inclua evidência real de hardware na descrição de PR apenas com autorização do proprietário do equipamento e sem identificadores sensíveis.

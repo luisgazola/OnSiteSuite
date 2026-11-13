@@ -2,7 +2,7 @@
 function New-OnsWindowsUsbLaunch {
  [CmdletBinding()]
  param([string]$RootPath,[string]$Output,[double]$Interval,[int]$Samples,
-       [ValidateSet('Auto','PowerShell','CMD')][string]$Terminal='Auto')
+       [ValidateSet('Auto','PowerShell','CMD')][string]$Terminal='Auto',[string]$Baseline='')
  if ($Interval -lt 0.2 -or $Interval -gt 60 -or $Samples -lt 0 -or $Samples -gt 100000) {
    throw 'Intervalo / amostras USB invalidos.'
  }
@@ -19,6 +19,7 @@ function New-OnsWindowsUsbLaunch {
  $invariant=$Interval.ToString('0.###',[Globalization.CultureInfo]::InvariantCulture)
  $payload="& $quotedEntry -UsbMonitor -UsbMonitorWorker -UsbInterval $invariant -UsbSamples $Samples"
  if ($Output) {$payload+=" -Output '"+$Output.Replace("'","''")+"'"}
+ if ($Baseline) {$payload+=" -UsbBaseline '"+$Baseline.Replace("'","''")+"'"}
  $encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($payload))
  if ($selected -eq 'CMD') {
    $comspec=if ($env:ComSpec) {$env:ComSpec} else {'cmd.exe'}
@@ -33,8 +34,8 @@ function New-OnsWindowsUsbLaunch {
 function Start-OnsWindowsUsbMonitorWindow {
  [CmdletBinding()]
  param([string]$RootPath,[string]$Output,[double]$Interval,[int]$Samples,
-       [ValidateSet('Auto','PowerShell','CMD')][string]$Terminal='Auto')
- $invocation=New-OnsWindowsUsbLaunch -RootPath $RootPath -Output $Output -Interval $Interval -Samples $Samples -Terminal $Terminal
+       [ValidateSet('Auto','PowerShell','CMD')][string]$Terminal='Auto',[string]$Baseline='')
+ $invocation=New-OnsWindowsUsbLaunch -RootPath $RootPath -Output $Output -Interval $Interval -Samples $Samples -Terminal $Terminal -Baseline $Baseline
  Start-Process -FilePath $invocation.FilePath -ArgumentList $invocation.ArgumentList -WorkingDirectory $RootPath -ErrorAction Stop | Out-Null
  Write-Host "Monitor USB iniciado em outra janela ($($invocation.Terminal)). Digite \q para encerrar e salvar o relatorio." -ForegroundColor Green
 }

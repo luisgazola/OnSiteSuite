@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ons_usage() {
 cat <<'HELP'
-OnSiteSuite 2.1.0 — diagnóstico local Linux | Excelsior Soluções
+OnSiteSuite 2.2.0 — diagnóstico local Linux | Excelsior Soluções
 Uso: ./onsite.sh [opções]
   --list-tests                 Lista códigos de testes disponíveis
   --info                       Exibe identificação do equipamento e sai
@@ -30,6 +30,7 @@ Uso: ./onsite.sh [opções]
   --usb-terminal NOME          auto|kgx|gnome-terminal|konsole|xfce4-terminal|xterm
   --usb-interval SEGUNDOS      Intervalo das sondagens (0.2 a 60; padrão 1)
   --usb-samples N              Limita amostras em execução supervisionada / teste
+  --usb-baseline ARQUIVO       Compara com usb-resumo.json de sessão anterior
   --quiet                      Mostra apenas caminho do relatório
   --help                       Exibe esta ajuda
 Sem opções, abre seleção se houver terminal; em automação executa conjunto padrão.

@@ -20,7 +20,7 @@ export PATH="$TMP/bin:$PATH"
 for count in 1 3 5; do
  before=0; [[ -f "$TMP/jobs/counter" ]] && read -r before < "$TMP/jobs/counter"
  folder="$($ROOT/onsite.sh --print-test FILA_TESTE --print-count "$count" --print-brand Epson --print-model TM-T20 --yes-print --output "$TMP/reports" --quiet)"
- jq -e '.version=="2.1.0" and (.tests | any(.id=="print_batch"))' "$folder/relatorio.json" > /dev/null
+ jq -e '.version=="2.2.0" and (.tests | any(.id=="print_batch"))' "$folder/relatorio.json" > /dev/null
  jq -e --arg n "$count" '[.tests[] | select(.id=="print_batch") | .summary]|join(" ")|contains($n)' "$folder/relatorio.json" > /dev/null
  [[ -f "$folder/comprovante-impressao.txt" ]]
  grep -q "Impressão Número: $count" "$folder/comprovante-impressao.txt"

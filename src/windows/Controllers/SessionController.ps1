@@ -3,7 +3,7 @@ function Start-OnsWindows {
  param([string]$RootPath,[string]$Tests,[bool]$All,[bool]$ListTests,[bool]$Online,
        [string]$Client,[string]$Ticket,[string]$Technician,[string]$Serial,[string]$Symptom,
        [string]$Output,[bool]$NonInteractive,[bool]$InfoOnly,[bool]$ShowInfo,
-       [bool]$UsbMonitor,[bool]$UsbMonitorWorker,[string]$UsbTerminal,[double]$UsbInterval,[int]$UsbSamples,
+       [bool]$UsbMonitor,[bool]$UsbMonitorWorker,[string]$UsbTerminal,[double]$UsbInterval,[int]$UsbSamples,[string]$UsbBaseline,
        [string]$PrintQueue,[int]$PrintCount,[string]$PrintBrand,[string]$PrintModel,
        [bool]$EscPosRaw,[bool]$CutAfterEach,[bool]$YesPrint,[bool]$YesCut,[string]$CutMode,
        [hashtable]$Dependencies)
@@ -13,10 +13,13 @@ function Start-OnsWindows {
  if ($CutAfterEach -and (-not $PrintQueue) -and (-not $UsbMonitor)) {throw 'Informe -PrintQueue para testar a guilhotina.'}
  if ($EscPosRaw -and -not $PrintQueue -and -not $UsbMonitor) {throw 'Informe -PrintQueue para ESC/POS.'}
  if ($PrintQueue -and -not $YesPrint) { throw 'Impressão física exige -YesPrint.' }
+ if ($UsbBaseline -and -not (Test-Path -LiteralPath $UsbBaseline -PathType Leaf)) {throw 'Arquivo de referência USB não encontrado.'}
+ if ($UsbBaseline -and -not $UsbMonitor) {throw 'Use -UsbBaseline apenas com -UsbMonitor.'}
+ if ($UsbBaseline) {$UsbBaseline=(Resolve-Path -LiteralPath $UsbBaseline).ProviderPath}
  if ($UsbMonitor) {
    if ($UsbMonitorWorker) {
-     Invoke-OnsWindowsUsbMonitor -RootPath $RootPath -Output $Output -Interval $UsbInterval -Samples $UsbSamples -Snapshot $Dependencies.UsbSnapshot -Report $Dependencies.Report -Equipment $Dependencies.Equipment
-   } else { & $Dependencies.UsbWindow $RootPath $Output $UsbInterval $UsbSamples $UsbTerminal }
+     Invoke-OnsWindowsUsbMonitor -RootPath $RootPath -Output $Output -Interval $UsbInterval -Samples $UsbSamples -Snapshot $Dependencies.UsbSnapshot -Report $Dependencies.Report -Equipment $Dependencies.Equipment -Baseline $UsbBaseline
+   } else { & $Dependencies.UsbWindow $RootPath $Output $UsbInterval $UsbSamples $UsbTerminal $UsbBaseline }
    return
  }
  $catalog = @(Get-OnsCatalog -RootPath $RootPath)
@@ -31,7 +34,7 @@ function Start-OnsWindows {
  if (-not $All -and [string]::IsNullOrWhiteSpace($Tests) -and -not $NonInteractive) {
    $selection = Read-OnsWindowsSelection -Catalog $catalog -Version $version
    if ($selection.Cancelled) { return }
-   if ($selection.Action -eq 'usb') { & $Dependencies.UsbWindow $RootPath $Output $UsbInterval $UsbSamples $UsbTerminal; return }
+   if ($selection.Action -eq 'usb') { & $Dependencies.UsbWindow $RootPath $Output $UsbInterval $UsbSamples $UsbTerminal $UsbBaseline; return }
    if ($selection.Action -eq 'print') {
      $chosen=Read-OnsWindowsPrintOptions
      if ($chosen.Cancelled) { return }

@@ -6,10 +6,10 @@
 
 Projeto **Excelsior Soluções em Tecnologia** · Desenvolvimento **Luís Gazola**
 
-![Versão](https://img.shields.io/badge/vers%C3%A3o-2.1.0-2563eb)
+![Versão](https://img.shields.io/badge/vers%C3%A3o-2.2.0-2563eb)
 ![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-16a34a)
 ![Linux](https://img.shields.io/badge/Linux-testes%20automatizados-16a34a)
-![Windows](https://img.shields.io/badge/Windows-homologa%C3%A7%C3%A3o%20pendente-f59e0b)
+![Windows](https://img.shields.io/badge/Windows-valida%C3%A7%C3%A3o%20v2.2%20pendente-f59e0b)
 ![Operação](https://img.shields.io/badge/funcionamento-local%20%7C%20offline-475569)
 
 [**Recursos**](#funcionalidades) · [**Linux**](#instalação-no-linux) · [**Windows**](#instalação-no-windows) · [**Monitor USB**](#monitoramento-usb-contínuo) · [**Impressão**](#sequência-avançada-de-impressão) · [**Arquitetura**](#arquitetura) · [**Contribuir**](#contribuindo)
@@ -30,10 +30,11 @@ O projeto evolui do **FieldServiceToolkit / FieldServiceSuite** para reduzir tar
 
 - Inventário do **SO, fabricante, modelo, série/Service Tag, tipo de equipamento, CPU, RAM e armazenamento**, quando disponíveis.
 - Sondagens de CPU, memória, SMART, bateria, rede, USB, impressoras, drivers, áudio, vídeo, logs e segurança — sempre com limites de medição explícitos.
-- **Monitor USB contínuo v2.1.0:** segunda janela de terminal (incluindo `kgx` no GNOME, `PowerShell 7` ou `CMD` no Windows), comparação periódica do inventário USB, eventos de conexão/desconexão com horário, encerramento por `\q` e relatório da sessão.
-- **Sequência de impressão v2.1.0:** lotes automáticos de **1, 3, 5 ou 1–100 comprovantes**, numerados e identificados por marca e modelo.
+- **Monitor USB contínuo (desde v2.1.0):** segunda janela de terminal (incluindo `kgx` no GNOME, `PowerShell 7` ou `CMD` no Windows), comparação periódica do inventário USB, eventos de conexão/desconexão com horário, encerramento por `\q` e relatório da sessão.
+- **Sequência de impressão (desde v2.1.0):** lotes automáticos de **1, 3, 5 ou 1–100 comprovantes**, numerados e identificados por marca e modelo.
 - **Guilhotina opcional ESC/POS:** envia o comando de corte depois de cada comprovante **somente** quando o operador declara compatibilidade e autoriza expressamente o acionamento.
 - Relatórios locais **JSON, TXT e HTML**; sessões de USB incluem `usb-eventos.jsonl`; impressão inclui o modelo enviado (`comprovante-impressao.txt`).
+- **USB Diagnostic Lab v2.2.0:** `usb-resumo.json` com contagem de reconexões e métricas por dispositivo; comparação opcional com uma sessão anterior (`usb-comparacao.json`).
 - Fluxos de troubleshooting e checklist técnico manual, sem reparos automáticos.
 
 > **Validação:** a suíte de regressão Linux, os eventos USB simulados e os lotes de impressão com spooler simulado foram testados. **Impressão real, corte físico e execução Windows ainda precisam de homologação em equipamentos reais.** O aceite do spooler não comprova a impressão, a comunicação elétrica ou o corte.
@@ -44,7 +45,7 @@ Ao iniciar sem parâmetros, o OnSiteSuite mostra a identificação do equipament
 
 ```text
 ======================================================================
- OnSiteSuite v2.1.0 | EXCELSIOR SOLUÇÕES
+ OnSiteSuite v2.2.0 | EXCELSIOR SOLUÇÕES
  Suíte de diagnóstico, troubleshooting e validação de periféricos
  Autoria: Excelsior Soluções em Tecnologia | Desenvolvedor: Luís Gazola
 ----------------------------------------------------------------------
@@ -77,16 +78,16 @@ Requisitos: **Bash 5.2+** e **jq 1.7+**. Cliente CUPS (`lp`) necessário apenas 
 | Arch Linux | `sudo pacman -S --needed jq` | `sudo pacman -S --needed cups` |
 | Gentoo | `sudo emerge -av app-misc/jq` | `sudo emerge -av net-print/cups` |
 
-**Para instalar a versão publicada**, clone a tag `v2.1.0` quando ela estiver disponível no GitHub:
+**Para instalar a versão publicada**, clone a tag `v2.2.0` quando ela estiver disponível no GitHub:
 
 ```bash
-git clone --branch v2.1.0 --depth 1 https://github.com/luisgazola/OnSiteSuite.git
+git clone --branch v2.2.0 --depth 1 https://github.com/luisgazola/OnSiteSuite.git
 cd OnSiteSuite
 chmod +x onsite.sh
 ./onsite.sh
 ```
 
-**Antes da publicação:** utilize o ZIP desta entrega. Extraia `OnSiteSuite-v2.1.0/`, entre na pasta e execute `chmod +x onsite.sh && ./onsite.sh`.
+**Antes da publicação:** utilize o ZIP desta entrega. Extraia `OnSiteSuite-v2.2.0/`, entre na pasta e execute `chmod +x onsite.sh && ./onsite.sh`.
 
 ### Uso Linux — diagnósticos
 
@@ -136,6 +137,22 @@ A aplicação registra as alterações de dispositivos USB identificadas por amo
 **Compatibilidade KGX (Gentoo/GNOME):** a abertura gráfica usa `kgx -- bash ...`, passando os parâmetros individualmente. Evita o erro `Faltando argumento para o --command` observado em algumas versões do GNOME Console. A confirmação de abertura continua baseada no serviço USB. Se houver erro na sessão gráfica, use `./onsite.sh --usb-monitor --foreground`.
 
 Para coleta limitada e testes automatizados: `--usb-monitor --foreground --usb-samples 10` (dez intervalos). O monitor não mede tensão, qualidade de sinal, taxa de erros USB ou perdas mais breves que o intervalo de amostragem.
+
+### USB Diagnostic Lab — v2.2.0
+
+Ao encerrar o monitor com `\q`, o OnSiteSuite gera **`usb-resumo.json`** na mesma pasta do laudo, além do arquivo original **`usb-eventos.jsonl`**. O resumo discrimina dispositivos, localizações identificáveis, VID/PID quando disponíveis, conexões, desconexões e **reconexões observadas**.
+
+Para **comparar duas sessões** (por exemplo, antes e depois de trocar um cabo), informe o resumo de uma sessão anterior:
+
+```bash
+./onsite.sh --usb-monitor --usb-terminal kgx \
+  --usb-baseline "/caminho/para/sessao-anterior/usb-resumo.json"
+```
+
+Na nova pasta será gerado também `usb-comparacao.json`, com as diferenças brutas nas contagens e os parâmetros de cada sessão. **Use intervalos e durações equivalentes** e confirme o resultado em campo; essa comparação não determina automaticamente a causa da falha.
+
+**Atenção:** no Linux o caminho de conexão (`sysfs`) pode auxiliar a localizar a topologia USB. No Windows o campo de porta física fica indeterminado quando a plataforma não o informa. Nomes e IDs de dispositivos podem conter dados de identificação sensíveis.
+
 
 ### Sequência avançada de impressão
 
@@ -191,7 +208,7 @@ Empresa: Excelsior Soluções em Tecnologia
 
 **Alvo:** Windows 10/11 com **PowerShell 7.4.6**. Os scripts Windows ainda não foram executados em hardware real nesta entrega. Não presuma compatibilidade com Windows PowerShell 5.1.
 
-Após obter o ZIP de `v2.1.0`, você pode iniciar a mesma aplicação pelo **PowerShell 7** ou pelo **Prompt de Comando (CMD)**. O CMD funciona como interface; o motor de diagnóstico continua sendo o **PowerShell 7.4.6** (`pwsh.exe`) e deve estar instalado e disponível no PATH.
+Após obter o ZIP de `v2.2.0`, você pode iniciar a mesma aplicação pelo **PowerShell 7** ou pelo **Prompt de Comando (CMD)**. O CMD funciona como interface; o motor de diagnóstico continua sendo o **PowerShell 7.4.6** (`pwsh.exe`) e deve estar instalado e disponível no PATH.
 
 **PowerShell 7:**
 
@@ -218,10 +235,27 @@ O arquivo `OnSiteSuite.cmd` vem na raiz do projeto e chama `pwsh.exe -NoProfile 
 Para obter a versão via Git após publicação:
 
 ```powershell
-git clone --branch v2.1.0 --depth 1 https://github.com/luisgazola/OnSiteSuite.git
+git clone --branch v2.2.0 --depth 1 https://github.com/luisgazola/OnSiteSuite.git
 Set-Location .\OnSiteSuite
 .\OnSiteSuite.ps1
 ```
+
+### USB Diagnostic Lab no Windows — v2.2.0
+
+Execute a análise USB com PowerShell 7, usando o motor de diagnóstico existente. Para comparar uma sessão atual com outra já salva:
+
+```powershell
+.\OnSiteSuite.ps1 -UsbMonitor -UsbTerminal PowerShell
+.\OnSiteSuite.ps1 -UsbMonitor -UsbTerminal CMD -UsbBaseline 'C:\Laudos\sessao-anterior\usb-resumo.json'
+```
+
+Os resultados adicionais são salvos junto aos três laudos tradicionais. O uso normal da v2.1.0 em Windows foi confirmado em campo pelo responsável, mas **as análises novas da v2.2.0 ainda exigem testes Windows próprios**. Para validar o serviço isoladamente:
+
+```powershell
+pwsh -NoProfile -File .\tests\run-windows.ps1
+```
+
+Consulte [notas da v2.2.0](docs/RELEASE_2.2.0.md) e [registro de validação](docs/VALIDATION_2.2.0.md).
 
 ### Monitor USB em nova janela no Windows
 
@@ -276,7 +310,7 @@ Cada sessão de diagnóstico gera os arquivos no diretório `Reports/AAAA/MM/DD/
 | `usb-eventos.jsonl` | **Apenas monitor USB:** registro completo de início, conexão, desconexão e encerramento com timestamp. |
 | `comprovante-impressao.txt` | **Apenas lote de impressão:** modelo numerado enviado ao spooler. |
 
-O contrato JSON permanece em **`schemaVersion: "2.0"`** para preservar a compatibilidade das integrações; a versão executável agora é **`2.1.0`**.
+O contrato JSON permanece em **`schemaVersion: "2.0"`** para preservar a compatibilidade das integrações; a versão executável agora é **`2.2.0`**.
 
 **Estados:** `OK`, `ATENCAO`, `FALHA`, `INCONCLUSIVO`, `NAO_SUPORTADO`. O resultado `INCONCLUSIVO` é adequado quando a fila aceita um job sem evidência de impressão física. Conexão/desconexão observada **não confirma** defeito de cabo, porta, controlador ou impressora.
 
@@ -296,7 +330,7 @@ Get-ChildItem .\Reports -Recurse -Filter relatorio.html |
 
 ## Arquitetura
 
-A v2.1.0 preserva o **MVC + Service Layer** consolidado na v2.0.3 e adiciona componentes especializados:
+A v2.2.0 preserva o **MVC + Service Layer** consolidado na v2.0.3 e adiciona componentes especializados:
 
 ```text
 OnSiteSuite/
@@ -357,13 +391,13 @@ Consulte [`SECURITY.md`](SECURITY.md) e [`docs/SECURITY.md`](docs/SECURITY.md). 
 
 O projeto usa o histórico do repositório [luisgazola/OnSiteSuite](https://github.com/luisgazola/OnSiteSuite), renomeado do FieldServiceToolkit.
 
-Para publicar a **v2.1.0** depois de revisar o código, configure autenticação Git e identidade do autor. Na pasta extraída, execute:
+Para publicar a **v2.2.0** depois de revisar o código, configure autenticação Git e identidade do autor. Na pasta extraída, execute:
 
 ```bash
 bash scripts/publish-github.sh
 ```
 
-O script executa os testes Linux, clona a branch `main` em nova pasta, aplica a nova versão e cria **uma nova tag `v2.1.0`**, sem sobrescrever as tags anteriores. A publicação exige permissão de escrita no GitHub.
+O script executa os testes Linux, clona a branch `main` em nova pasta, aplica a nova versão e cria **uma nova tag `v2.2.0`**, sem sobrescrever as tags anteriores. A publicação exige permissão de escrita no GitHub.
 
 ## Contribuindo
 
@@ -371,7 +405,7 @@ Contribuições em compatibilidade ESC/POS, drivers, simuladores, integração W
 
 ## Referências e licença
 
-**Projeto:** OnSiteSuite · **Versão:** 2.1.0  
+**Projeto:** OnSiteSuite · **Versão:** 2.2.0  
 **Empresa:** **Excelsior Soluções em Tecnologia**  
 **Desenvolvedor:** **Luís Gazola** · [@luisgazola](https://github.com/luisgazola)  
 **Código-fonte:** [github.com/luisgazola/OnSiteSuite](https://github.com/luisgazola/OnSiteSuite)
@@ -380,4 +414,4 @@ Licença **[MIT](LICENSE)**. Projeto derivado e evoluído do FieldServiceToolkit
 
 ---
 
-<div align="center">**OnSiteSuite v2.1.0 — Field Service orientado a evidências, integração simples e execução sob controle do técnico.**</div>
+<div align="center">**OnSiteSuite v2.2.0 — Field Service orientado a evidências, integração simples e execução sob controle do técnico.**</div>

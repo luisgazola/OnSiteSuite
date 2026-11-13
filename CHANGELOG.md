@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.2.0 — USB Diagnostic Lab
+
+- Implementado resumo por dispositivo de cada monitoramento USB, com conexões, desconexões, reconexões e estados inicial/final.
+- Acrescentados `usb-resumo.json` e `usb-comparacao.json` opcionais, mantendo `usb-eventos.jsonl` e os relatórios JSON/TXT/HTML (schema principal 2.0).
+- Novo parâmetro `--usb-baseline CAMINHO` (Linux) / `-UsbBaseline CAMINHO` (Windows).
+- Serviços de análise separados dos adaptadores e controllers, preservando arquitetura MVC + Service Layer e a correção homologada do KGX.
+- Testes Linux determinísticos, comparação de sessões, contrato e integração; testes PowerShell novos fornecidos para execução em Windows.
+- Windows v2.1.0 relatado como funcional pelo responsável; novos recursos v2.2.0 ainda não homologados em Windows real.
+
 ## Correção do lançador USB v2.1.0 (sem mudança de versão)
 
 - Corrigida mensagem de sucesso indevida: monitor USB confirma sua inicialização antes da confirmação ao usuário.

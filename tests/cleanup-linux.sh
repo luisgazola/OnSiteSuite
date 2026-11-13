@@ -14,7 +14,7 @@ if grep -RInE 'Get-Fss[A-Za-z]+|Initialize-OnsLegacy|Import-FssLayer|\$global:Fs
 fi
 [[ -s "$ROOT/config/troubleshooting-flows.json" ]]
 jq -e 'type=="object" and (.notebook_lento|type=="array") and (.sem_internet|type=="array")'   "$ROOT/config/troubleshooting-flows.json" >/dev/null
-[[ "$(cat "$ROOT/VERSION")" == '2.1.0' ]]
+[[ "$(cat "$ROOT/VERSION")" == '2.2.0' ]]
 grep -Fq "WindowsDiagnosticAdapter.ps1" "$ROOT/src/windows/App/Bootstrap.ps1"
 if grep -Fq 'Initialize-OnsLegacy' "$ROOT/src/windows/Controllers/SessionController.ps1"; then exit 1; fi
 printf 'OK: arquitetura consolidada e caminhos obsoletos ausentes.\n'

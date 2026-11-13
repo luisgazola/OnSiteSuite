@@ -1,4 +1,4 @@
-# Arquitetura — OnSiteSuite v2.1.0
+# Arquitetura — OnSiteSuite v2.2.0
 
 ## Objetivo
 
@@ -78,3 +78,9 @@ pwsh -NoProfile -File ./tests/adapters-windows.ps1
 - No Linux, a seleção de emulador ocorre em `Adapters/TerminalAdapter.sh`, com detecção preferencial de `kgx` (GNOME Console) e suporte aos terminais anteriores. A opção `--usb-terminal` permite escolher explicitamente a interface.
 - No Windows, `WindowsTerminalAdapter.ps1` prepara uma chamada segura via `-EncodedCommand` (UTF-16LE), permitindo iniciar a sessão USB em **PowerShell 7** ou **CMD**. `OnSiteSuite.cmd` é apenas um ponto de entrada para CMD; o motor continua sendo PowerShell 7.
 - O coletor de eventos e gerador de laudos continuam na Service Layer, independente do terminal escolhido.
+
+## USB Diagnostic Lab v2.2.0
+
+`UsbMonitorService` gerencia a sessão e escreve o fluxo de eventos. `UsbAnalysisService` recebe esse fluxo, uma fotografia inicial/final e os parâmetros de amostragem e gera `usb-resumo.json`. Com uma referência externa, também gera `usb-comparacao.json`. O adaptador Windows recebe PnP IDs e o Linux recebe o caminho de dispositivos do sysfs; as camadas de domínio **não inferem eletricidade nem defeitos físicos**.
+
+Os relatórios canônicos permanecem em `schemaVersion=2.0`. Os anexos analíticos possuem `schemaVersion=1.0` e não alteram a estrutura dos laudos antigos.

@@ -33,7 +33,7 @@ for choice in kgx auto; do
  grep -F -- '--foreground' "$args_file" >/dev/null
  [[ "$(find "$dir" -name relatorio.json | wc -l)" -eq 1 ]]
  json="$(find "$dir" -name relatorio.json -print -quit)"
- jq -e '.version=="2.1.0" and .tests[0].id=="usb_monitor"' "$json" >/dev/null
+ jq -e '.version=="2.2.0" and .tests[0].id=="usb_monitor"' "$json" >/dev/null
  [[ -s "$(dirname "$json")/usb-eventos.jsonl" ]]
 done
 if WAYLAND_DISPLAY='wayland-1' "$ROOT/onsite.sh" --usb-monitor --usb-terminal fake --usb-samples 1 >"$TMP/err" 2>&1; then

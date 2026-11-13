@@ -27,11 +27,11 @@ try {
  }
  $session = [pscustomobject]@{
   RootPath=$root;Output=$temporary;Client='<script>alert(1)</script>';Ticket='CH123';Technician='Teste'
-  Serial='';Online=$false;Version='2.1.0';Equipment=$equipment
+  Serial='';Online=$false;Version='2.2.0';Equipment=$equipment
  }
  $report = Write-OnsWindowsReport -Session $session -Results $results
  $data = Get-Content -Raw -Encoding UTF8 (Join-Path $report.Folder 'relatorio.json') | ConvertFrom-Json
- if ($data.schemaVersion -ne '2.0' -or $data.version -ne '2.1.0' -or $data.summary.total -ne 2) {
+ if ($data.schemaVersion -ne '2.0' -or $data.version -ne '2.2.0' -or $data.summary.total -ne 2) {
   throw 'Contrato JSON Windows inválido.'
  }
  $html = Get-Content -Raw -Encoding UTF8 (Join-Path $report.Folder 'relatorio.html')

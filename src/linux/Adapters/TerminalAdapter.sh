@@ -3,10 +3,11 @@
 # Adaptador de inicializacao do terminal grafico; coleta/relatorio seguem no worker.
 # A escolha explicita evita fallback silencioso em terminais diferentes do solicitado.
 ons_launch_usb_terminal() {
- local root="$1" out="$2" interval="$3" samples="$4" preferred="${5:-auto}" terminal command_line
+ local root="$1" out="$2" interval="$3" samples="$4" preferred="${5:-auto}" baseline="${6:-}" terminal command_line
  local launch_dir launch_ack launch_log launcher_pid started=0 attempt
  local -a args=("$root/onsite.sh" --usb-monitor --foreground --output "$out" --usb-interval "$interval")
  ((samples>0)) && args+=(--usb-samples "$samples")
+ [[ -n "$baseline" ]] && args+=(--usb-baseline "$baseline")
  if [[ -z "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]]; then
   printf 'Ambiente grafico nao detectado. Use ./onsite.sh --usb-monitor --foreground\n' >&2; return 2
  fi

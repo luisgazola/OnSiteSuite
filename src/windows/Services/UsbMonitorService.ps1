@@ -1,12 +1,19 @@
 # Monitor de USB, capturas e laudos. Janela secundaria: WindowsTerminalAdapter.ps1.
 function Invoke-OnsWindowsUsbMonitor {
- param([string]$RootPath,[string]$Output,[double]$Interval,[int]$Samples,[scriptblock]$Snapshot,[scriptblock]$Report,[scriptblock]$Equipment)
+ param([string]$RootPath,[string]$Output,[double]$Interval,[int]$Samples,[scriptblock]$Snapshot,[scriptblock]$Report,[scriptblock]$Equipment,[string]$Baseline='')
  if ($Interval -lt 0.2 -or $Interval -gt 60 -or $Samples -lt 0 -or $Samples -gt 100000) { throw 'Intervalo ou quantidade de amostras inválida.' }
+ if ($Baseline) {
+   $reference=Get-Content -LiteralPath $Baseline -Raw -Encoding UTF8|ConvertFrom-Json
+   if ($reference.product -ne 'OnSiteSuite' -or $reference.schemaVersion -ne '1.0' -or $null -eq $reference.metrics -or $null -eq $reference.devices) {
+     throw 'Baseline USB inválido: use usb-resumo.json da v2.2.0.'
+   }
+ }
  $version=(Get-Content -LiteralPath (Join-Path $RootPath 'VERSION') -Raw).Trim()
  $logdir=Join-Path ([IO.Path]::GetTempPath()) ('OnSiteSuite-USB-'+[Guid]::NewGuid().ToString('N'))
  $null=New-Item -ItemType Directory -Path $logdir -Force
  $log=Join-Path $logdir 'usb-eventos.jsonl'
  $prev=& $Snapshot
+ $initial=@{}; foreach($key in $prev.Keys) {$initial[$key]=$prev[$key]}
  $connected=0; $disconnected=0; $sample=0
  $stop=$false; $keys=''
  Write-Host "OnSiteSuite v$version - EXCELSIOR SOLUÇÕES | MONITOR USB" -ForegroundColor Cyan
@@ -48,14 +55,22 @@ function Invoke-OnsWindowsUsbMonitor {
    }
  } finally {
    & $append 'FIM' "Amostras: $sample; conexões: $connected; desconexões: $disconnected"
+   $analysis=Join-Path $logdir 'usb-resumo.json'
+   Write-OnsWindowsUsbAnalysis -EventsPath $log -Initial $initial -Final $prev -Interval $Interval -Samples $sample -Version $version -Destination $analysis
+   $stats=Get-Content -LiteralPath $analysis -Raw | ConvertFrom-Json
+   Write-Host "Análise USB: $($stats.metrics.affectedDevices) dispositivos alterados e $($stats.metrics.reconnections) reconexões observadas."
+   $comparison=Join-Path $logdir 'usb-comparacao.json'
+   if ($Baseline) {Write-OnsWindowsUsbComparison -Current $analysis -Baseline $Baseline -Destination $comparison}
    $status=if (($connected+$disconnected) -gt 0) {'ATENCAO'} else {'INCONCLUSIVO'}
    $tail=@(Get-Content -LiteralPath $log -Tail 30 -ErrorAction SilentlyContinue)
-   $summary="Monitoramento concluído: $sample amostras, $connected conexão(ões) e $disconnected desconexão(ões)."
+   $summary="Monitoramento concluído: $sample amostras, $connected conexão(ões) e $disconnected desconexão(ões) e $($stats.metrics.reconnections) reconexão(ões) observadas."
    $evidence="Monitor por amostragem de ${Interval}s; não detecta eventos que começam e terminam entre as leituras.`n"+($tail -join "`n")
    $result=New-OnsWindowsResult 'usb_monitor' 'Monitoramento contínuo USB' $status $summary $evidence @('Compare cabo, porta e dispositivo quando houver desconexões repetidas.')
    $session=[pscustomobject]@{RootPath=$RootPath;Output=$Output;Version=$version;Equipment=(& $Equipment);Client='';Ticket='';Technician='';Serial='';Online=$false}
    $report=& $Report $session @($result)
    Copy-Item -LiteralPath $log -Destination (Join-Path $report.Folder 'usb-eventos.jsonl') -Force
+   Copy-Item -LiteralPath $analysis -Destination (Join-Path $report.Folder 'usb-resumo.json') -Force
+   if ($Baseline) {Copy-Item -LiteralPath $comparison -Destination (Join-Path $report.Folder 'usb-comparacao.json') -Force}
    Remove-Item -LiteralPath $logdir -Recurse -Force -ErrorAction SilentlyContinue
    Write-Host "Monitor encerrado. Laudos em $($report.Folder)" -ForegroundColor Green
  }

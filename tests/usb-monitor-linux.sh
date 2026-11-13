@@ -19,7 +19,7 @@ ONS_USB_SYSFS="$TMP/sysfs" "$ROOT/onsite.sh" --usb-monitor --foreground --usb-in
 mapfile -t reports < <(find "$TMP/reports" -name relatorio.json)
 [[ "${#reports[@]}" == 1 ]]
 json="${reports[0]}"; folder="$(dirname -- "$json")"
-jq -e '.version == "2.1.0" and .schemaVersion=="2.0" and .tests[0].id=="usb_monitor" and .summary.total==1' "$json" >/dev/null
+jq -e '.version == "2.2.0" and .schemaVersion=="2.0" and .tests[0].id=="usb_monitor" and .summary.total==1' "$json" >/dev/null
 [[ -s "$folder/usb-eventos.jsonl" ]]
 jq -s -e 'map(.event) | index("CONECTADO")!=null and index("DESCONECTADO")!=null' "$folder/usb-eventos.jsonl" >/dev/null
 jq -e '.tests[0].status=="ATENCAO"' "$json" >/dev/null
