@@ -2,213 +2,167 @@
 
 # OnSiteSuite
 
-**Diagnóstico, observabilidade USB e validação de impressoras para Field Service.**
+### Diagnóstico, troubleshooting e automação técnica para Field Service e suporte de TI
 
-Projeto **Excelsior Soluções em Tecnologia** · Desenvolvimento **Luís Gazola**
+**Uma suíte open source e multiplataforma para investigar problemas, organizar procedimentos e documentar evidências técnicas.**
 
-![Versão](https://img.shields.io/badge/vers%C3%A3o-2.2.0-2563eb)
-![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-16a34a)
-![Linux](https://img.shields.io/badge/Linux-testes%20automatizados-16a34a)
-![Windows](https://img.shields.io/badge/Windows-valida%C3%A7%C3%A3o%20v2.2%20pendente-f59e0b)
-![Operação](https://img.shields.io/badge/funcionamento-local%20%7C%20offline-475569)
+**Projeto pessoal de Luís Fernando Gazola**, integrado ao ecossistema de iniciativas da **Excelsior Soluções em Tecnologia**
 
-[**Recursos**](#funcionalidades) · [**Linux**](#instalação-no-linux) · [**Windows**](#instalação-no-windows) · [**Monitor USB**](#monitoramento-usb-contínuo) · [**Impressão**](#sequência-avançada-de-impressão) · [**Arquitetura**](#arquitetura) · [**Contribuir**](#contribuindo)
+[![Versão](https://img.shields.io/badge/vers%C3%A3o-2.2.0-2563eb)](CHANGELOG.md)
+[![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-16a34a)](LICENSE)
+![Plataformas](https://img.shields.io/badge/plataformas-Windows%20%7C%20Linux-475569)
+![Tecnologias](https://img.shields.io/badge/PowerShell%207-%2B%20Bash-7c3aed)
+![Operação](https://img.shields.io/badge/execu%C3%A7%C3%A3o-local%20%7C%20offline-0891b2)
+
+[Visão geral](#visão-geral) · [Aplicações](#onde-o-onsitesuite-é-útil) · [Recursos](#o-que-o-projeto-oferece) · [Instalação](#comece-a-usar) · [Arquitetura](#arquitetura-e-tecnologias) · [Contribuir](#contribua-com-o-projeto)
+
+**[Repositório](https://github.com/luisgazola/OnSiteSuite)** · **[Versões](https://github.com/luisgazola/OnSiteSuite/tags)** · **[Evolução do projeto](docs/ROADMAP.md)**
 
 </div>
 
 ---
 
-## O projeto
+## Visão geral
 
-O **OnSiteSuite** é uma suíte de terminal open source para técnicos de campo, assistências, help desks, profissionais de infraestrutura e desenvolvedores. Reúne identificação de equipamentos, diagnósticos selecionáveis, observação de eventos USB, testes de impressão e laudos técnicos locais.
+O **OnSiteSuite** é um projeto autoral de software voltado à **operação e ao diagnóstico técnico de computadores, sistemas operacionais e periféricos**. Foi criado para apoiar profissionais que precisam investigar incidentes, verificar o estado de equipamentos, executar procedimentos de troubleshooting e produzir registros claros do trabalho realizado.
 
-O projeto evolui do **FieldServiceToolkit / FieldServiceSuite** para reduzir tarefas repetitivas em atendimentos: localizar informações de hardware, consultar indicadores, identificar desconexões intermitentes, validar periféricos e documentar a evidência de forma consistente. Uma OS, servidor ou conexão à internet **não são obrigatórios**.
+A ferramenta reúne em um único fluxo tarefas frequentemente espalhadas por comandos do sistema, utilitários de fabricantes e anotações manuais. Pode ser utilizada em atendimentos presenciais, bancadas de manutenção, laboratórios, help desks e atividades de suporte à infraestrutura.
 
-**Fluxo:** identificar o equipamento → selecionar a operação → coletar evidências → registrar resultado → exportar laudo.
+Seu objetivo é **reduzir atividades repetitivas, melhorar a consistência dos diagnósticos e facilitar a coleta de evidências**, mantendo o técnico responsável pela interpretação e pelas decisões.
 
-### Funcionalidades
+O projeto surgiu da experiência prática de **Luís Fernando Gazola** com Field Service e evoluiu do **FieldServiceToolkit**. É mantido como iniciativa pessoal e faz parte do ecossistema de projetos da **Excelsior Soluções em Tecnologia**. O funcionamento do OnSiteSuite é independente: **não exige ExcelsiorDesk, servidor, conta, banco de dados nem conexão à internet**. Integrações entre produtos são possibilidades de evolução, não requisitos da versão atual.
 
-- Inventário do **SO, fabricante, modelo, série/Service Tag, tipo de equipamento, CPU, RAM e armazenamento**, quando disponíveis.
-- Sondagens de CPU, memória, SMART, bateria, rede, USB, impressoras, drivers, áudio, vídeo, logs e segurança — sempre com limites de medição explícitos.
-- **Monitor USB contínuo (desde v2.1.0):** segunda janela de terminal (incluindo `kgx` no GNOME, `PowerShell 7` ou `CMD` no Windows), comparação periódica do inventário USB, eventos de conexão/desconexão com horário, encerramento por `\q` e relatório da sessão.
-- **Sequência de impressão (desde v2.1.0):** lotes automáticos de **1, 3, 5 ou 1–100 comprovantes**, numerados e identificados por marca e modelo.
-- **Guilhotina opcional ESC/POS:** envia o comando de corte depois de cada comprovante **somente** quando o operador declara compatibilidade e autoriza expressamente o acionamento.
-- Relatórios locais **JSON, TXT e HTML**; sessões de USB incluem `usb-eventos.jsonl`; impressão inclui o modelo enviado (`comprovante-impressao.txt`).
-- **USB Diagnostic Lab v2.2.0:** `usb-resumo.json` com contagem de reconexões e métricas por dispositivo; comparação opcional com uma sessão anterior (`usb-comparacao.json`).
-- Fluxos de troubleshooting e checklist técnico manual, sem reparos automáticos.
+### Princípios do projeto
 
-> **Validação:** a suíte de regressão Linux, os eventos USB simulados e os lotes de impressão com spooler simulado foram testados. **Impressão real, corte físico e execução Windows ainda precisam de homologação em equipamentos reais.** O aceite do spooler não comprova a impressão, a comunicação elétrica ou o corte.
+- **Utilidade em campo:** comandos objetivos e seleção de testes conforme o problema.
+- **Diagnóstico responsável:** distinguir medições, observações, hipóteses e limitações.
+- **Offline por padrão:** execução e geração de relatórios no equipamento local.
+- **Multiplataforma:** experiência equivalente em Windows e Linux, respeitando as APIs de cada sistema.
+- **Modularidade:** recursos organizados em camadas para facilitar testes e manutenção.
+- **Evidências portáveis:** arquivos estruturados que podem acompanhar atendimentos e análises futuras.
+- **Software aberto:** código acessível para estudo, auditoria e colaboração sob a licença MIT.
 
-## Experiência no terminal
+## Onde o OnSiteSuite é útil
 
-Ao iniciar sem parâmetros, o OnSiteSuite mostra a identificação do equipamento e o menu. Valores ausentes aparecem como **Não identificado**.
+| Cenário | Aplicação prática |
+|---|---|
+| **Field Service e suporte presencial** | Identificar o equipamento, selecionar verificações e registrar o atendimento. |
+| **Help Desk e troubleshooting** | Investigar sintomas de lentidão, rede, bateria, armazenamento, drivers e periféricos. |
+| **Assistência técnica e bancada** | Repetir procedimentos de inspeção e comparar evidências entre sessões. |
+| **Infraestrutura e suporte corporativo** | Consultar indicadores locais de sistema, hardware, serviços e eventos. |
+| **Periféricos e dispositivos USB** | Observar conexões, desconexões e reconexões durante um teste controlado. |
+| **Desenvolvimento e aprendizado** | Estudar automação multiplataforma, arquitetura modular, testes e geração de relatórios. |
+
+## O que o projeto oferece
+
+As funcionalidades atuais estão agrupadas por **capacidade técnica**, e não por um único tipo de equipamento.
+
+| Área | Capacidades disponíveis na v2.2.0 |
+|---|---|
+| **Inventário e contexto** | Sistema operacional, fabricante, modelo, número de série/Service Tag quando disponíveis, CPU, memória e armazenamento. |
+| **Hardware e saúde do sistema** | Sondagens de processador, memória, unidades de armazenamento, SMART opcional e bateria; dependem das informações expostas pelo equipamento. |
+| **Sistema operacional e infraestrutura** | Inspeção de rede, dispositivos, drivers, logs e indicadores locais de segurança. |
+| **Periféricos** | Identificação de USB, impressoras, áudio e monitores; certos testes são apenas de enumeração, sem validação física completa. |
+| **Monitoramento e observabilidade** | Sessões de observação USB, eventos cronológicos, estatísticas por dispositivo e comparação opcional entre sessões. |
+| **Troubleshooting orientado** | Fluxos por sintoma e checklist físico supervisionado, sem reparos automáticos. |
+| **Validação de impressão** | Comprovantes numerados e envio ao spooler; corte ESC/POS opcional apenas com compatibilidade declarada e autorização explícita. |
+| **Documentação técnica** | Relatórios JSON, TXT e HTML, além de arquivos específicos de evidência quando aplicáveis. |
+
+> **Limites importantes:** uma sondagem não equivale a um teste laboratorial completo. Identificar uma impressora não comprova impressão física; listar um dispositivo de áudio não comprova reprodução; observar uma desconexão USB não identifica automaticamente o componente defeituoso. Os relatórios preservam essas distinções.
+
+### Como funciona
 
 ```text
-======================================================================
- OnSiteSuite v2.2.0 | EXCELSIOR SOLUÇÕES
- Suíte de diagnóstico, troubleshooting e validação de periféricos
- Autoria: Excelsior Soluções em Tecnologia | Desenvolvedor: Luís Gazola
-----------------------------------------------------------------------
- IDENTIFICAÇÃO DO EQUIPAMENTO
- SO:                  Linux / Windows
- Número de série:     [lido do firmware ou Não identificado]
- Service Tag:         [quando disponível]
- Marca / Modelo:      [inventário do equipamento]
- Tipo:                Desktop / Notebook / AIO / Não identificado
- CPU / RAM / Discos:  [valores disponíveis]
-----------------------------------------------------------------------
- MENU DE TESTES
- 1. [x] Identificação do sistema
- 2. [x] Processador e temperaturas disponíveis
- ...
- a = Todos passivos | r = Executar | u = Monitor USB | p = Imprimir
- q = Sair
+Abrir o OnSiteSuite
+        │
+        ▼
+Identificar o equipamento e o ambiente
+        │
+        ▼
+Selecionar diagnóstico, monitoramento ou procedimento
+        │
+        ▼
+Coletar informações e evidências locais
+        │
+        ▼
+Revisar os resultados e as limitações
+        │
+        ▼
+Gerar relatórios e registrar conclusões do atendimento
 ```
 
-**Atalhos:** números alternam testes; `a` seleciona passivos; `r` executa; **`u` abre o monitor em outra janela**; **`p` inicia o assistente de impressão**; `q` sai do menu. Em execução por parâmetros, o menu é dispensado.
+O usuário pode operar pelo **menu interativo** ou por **parâmetros de linha de comando**, úteis para repetição de testes e automação autorizada. A criação de uma ordem de serviço é opcional.
 
-## Instalação no Linux
+## Comece a usar
 
-Requisitos: **Bash 5.2+** e **jq 1.7+**. Cliente CUPS (`lp`) necessário apenas para impressão. Para abrir uma segunda janela é necessário um emulador gráfico como **GNOME Console (`kgx`)**; `--foreground` funciona no próprio terminal.
+### Requisitos
 
-| Distribuição | Instalar `jq` | Cliente CUPS (opcional) |
-|---|---|---|
-| Debian / Ubuntu | `sudo apt update && sudo apt install -y jq` | `sudo apt install -y cups-client` |
-| Fedora | `sudo dnf install -y jq` | `sudo dnf install -y cups-client` |
-| Arch Linux | `sudo pacman -S --needed jq` | `sudo pacman -S --needed cups` |
-| Gentoo | `sudo emerge -av app-misc/jq` | `sudo emerge -av net-print/cups` |
+| Plataforma | Requisitos principais |
+|---|---|
+| **Linux** | Bash **5.2+**, `jq` **1.7+**; ferramentas de diagnóstico adicionais conforme o módulo escolhido. |
+| **Windows 10/11** | **PowerShell 7** (`pwsh.exe`); a versão de referência do projeto é **7.4.6**. Também há lançador para CMD. |
 
-**Para instalar a versão publicada**, clone a tag `v2.2.0` quando ela estiver disponível no GitHub:
+O projeto não requer Docker, Kubernetes, serviço web, instalação de banco de dados ou privilégios administrativos para iniciar. Determinadas leituras de hardware podem exigir permissões específicas.
+
+### 1. Baixar o código
+
+**Com Git, usando a versão específica 2.2.0:**
 
 ```bash
 git clone --branch v2.2.0 --depth 1 https://github.com/luisgazola/OnSiteSuite.git
 cd OnSiteSuite
+```
+
+Outra opção é baixar o arquivo ZIP da versão no [repositório GitHub](https://github.com/luisgazola/OnSiteSuite/tags) e extrair os arquivos em uma pasta de sua preferência.
+
+### 2. Linux — Debian/Ubuntu, Fedora, Arch Linux e Gentoo
+
+Instale a dependência básica `jq` usando **somente o comando da sua distribuição**:
+
+```bash
+# Debian / Ubuntu
+sudo apt update && sudo apt install -y jq
+
+# Fedora
+sudo dnf install -y jq
+
+# Arch Linux
+sudo pacman -S --needed jq
+
+# Gentoo
+sudo emerge -av app-misc/jq
+```
+
+Na pasta do projeto:
+
+```bash
 chmod +x onsite.sh
-./onsite.sh
+./onsite.sh                          # menu interativo
+./onsite.sh --info                   # identificação do equipamento
+./onsite.sh --list-tests             # catálogo de testes
+./onsite.sh --tests system,cpu,memory,storage
+./onsite.sh --all                    # sondagens passivas
 ```
 
-**Antes da publicação:** utilize o ZIP desta entrega. Extraia `OnSiteSuite-v2.2.0/`, entre na pasta e execute `chmod +x onsite.sh && ./onsite.sh`.
-
-### Uso Linux — diagnósticos
+Para diagnosticar um sintoma ou executar um monitoramento supervisionado:
 
 ```bash
-./onsite.sh --help
-./onsite.sh --info                          # identificação sem testes
-./onsite.sh --list-tests                    # IDs de sondagens
-./onsite.sh --tests system,cpu,memory,usb   # apenas estes testes
-./onsite.sh --all                           # sondagens passivas
-./onsite.sh --tests network --online        # sondagem externa autorizada
 ./onsite.sh --tests troubleshooting --symptom sem_internet
+./onsite.sh --usb-monitor            # monitor USB em segundo terminal
+./onsite.sh --usb-monitor --foreground  # monitor no terminal atual
 ```
 
-### Monitoramento USB contínuo
-
-**Abrir em um segundo terminal gráfico (detecção automática):**
-
-```bash
-./onsite.sh --usb-monitor
-```
-
-O Linux prioriza o **GNOME Console (`kgx`)**, quando instalado, e oferece fallback para `gnome-terminal`, `konsole`, `xfce4-terminal` ou `xterm`.
-
-**Usar obrigatoriamente o GNOME Console (kgx):**
+No Gentoo com GNOME Console, é possível selecionar o terminal `kgx`:
 
 ```bash
 ./onsite.sh --usb-monitor --usb-terminal kgx
 ```
 
-Se precisar instalar o GNOME Console, utilize o gerenciador de pacotes de sua distribuição (no Gentoo, instale `gui-apps/gnome-console` (comando: `sudo emerge -av gui-apps/gnome-console`)). Também é possível selecionar `--usb-terminal gnome-terminal`, `konsole`, `xfce4-terminal` ou `xterm`. Uma escolha explícita indisponível produz erro, sem mudar silenciosamente de terminal.
+No monitor USB Linux, digite **`\q` e ENTER** para encerrar e salvar as evidências. O programa usa `kgx -- bash ...` para abrir a janela quando esse terminal é escolhido.
 
-Em uma sessão sem ambiente gráfico, ou para acompanhar no terminal atual:
+### 3. Windows — PowerShell 7 e CMD
 
-```bash
-./onsite.sh --usb-monitor --foreground
-```
-
-Se pressionar **`u`** no menu, o programa agora aguarda confirmação da inicialização do monitor e apresenta erros da janela gráfica em vez de indicar sucesso sem verificação. Se não abrir, experimente `kgx --version` e execute `./onsite.sh --usb-monitor --foreground` para diagnosticar sem outra janela. O lançador armazena um log temporário quando não consegue abrir o terminal.
-
-A aplicação registra as alterações de dispositivos USB identificadas por amostragem (padrão **1 segundo**). **Na janela do monitor, digite `\q` e pressione ENTER**. Isso encerra a coleta, gera o laudo e fecha a janela secundária (quando aberta pelo aplicativo). A janela principal permanece disponível.
-
-```bash
-./onsite.sh --usb-monitor --usb-interval 0.5
-./onsite.sh --usb-monitor --foreground --usb-interval 2 --output "$HOME/Laudos"
-```
-
-**Compatibilidade KGX (Gentoo/GNOME):** a abertura gráfica usa `kgx -- bash ...`, passando os parâmetros individualmente. Evita o erro `Faltando argumento para o --command` observado em algumas versões do GNOME Console. A confirmação de abertura continua baseada no serviço USB. Se houver erro na sessão gráfica, use `./onsite.sh --usb-monitor --foreground`.
-
-Para coleta limitada e testes automatizados: `--usb-monitor --foreground --usb-samples 10` (dez intervalos). O monitor não mede tensão, qualidade de sinal, taxa de erros USB ou perdas mais breves que o intervalo de amostragem.
-
-### USB Diagnostic Lab — v2.2.0
-
-Ao encerrar o monitor com `\q`, o OnSiteSuite gera **`usb-resumo.json`** na mesma pasta do laudo, além do arquivo original **`usb-eventos.jsonl`**. O resumo discrimina dispositivos, localizações identificáveis, VID/PID quando disponíveis, conexões, desconexões e **reconexões observadas**.
-
-Para **comparar duas sessões** (por exemplo, antes e depois de trocar um cabo), informe o resumo de uma sessão anterior:
-
-```bash
-./onsite.sh --usb-monitor --usb-terminal kgx \
-  --usb-baseline "/caminho/para/sessao-anterior/usb-resumo.json"
-```
-
-Na nova pasta será gerado também `usb-comparacao.json`, com as diferenças brutas nas contagens e os parâmetros de cada sessão. **Use intervalos e durações equivalentes** e confirme o resultado em campo; essa comparação não determina automaticamente a causa da falha.
-
-**Atenção:** no Linux o caminho de conexão (`sysfs`) pode auxiliar a localizar a topologia USB. No Windows o campo de porta física fica indeterminado quando a plataforma não o informa. Nomes e IDs de dispositivos podem conter dados de identificação sensíveis.
-
-
-### Sequência avançada de impressão
-
-**Primeiro configure uma fila CUPS** e verifique o nome exato por `lpstat -a`. O menu **`p`** guia as escolhas de fila, marca, modelo, quantidade e confirmação.
-
-**Imprimir 1, 3, 5 ou uma quantidade digitada (exemplo: 7):**
-
-```bash
-./onsite.sh --print-test NOME_DA_FILA --print-count 1 --yes-print
-./onsite.sh --print-test NOME_DA_FILA --print-count 3 --yes-print
-./onsite.sh --print-test NOME_DA_FILA --print-count 5 --yes-print
-./onsite.sh --print-test NOME_DA_FILA --print-count 7 \
-  --print-brand Epson --print-model TM-T20 --yes-print
-```
-
-O **modo padrão** envia os comprovantes de maneira sequencial para a fila, **sem comandar a guilhotina**. São múltiplas impressões numa mesma operação, não impressoras físicas atuando em paralelo.
-
-**Corte depois de cada impressão (exclusivo para impressora comprovadamente compatível com RAW ESC/POS):**
-
-```bash
-./onsite.sh --print-test NOME_DA_FILA --print-count 5 \
-  --print-brand Epson --print-model TM-T20 \
-  --escpos-raw --cut-after-each --cut-mode full \
-  --yes-print --yes-cut
-```
-
-O modo RAW envia **um job com cinco comprovantes e cinco comandos de corte `GS V 0`** após cada comprovante. `--cut-mode partial` usa `GS V 1`. Essas variantes dependem do modelo e firmware. Algumas filas CUPS filtram ou rejeitam RAW. Se houver dúvida, **não use o corte**; consulte o manual ESC/POS da impressora, a configuração da fila e o comportamento do modelo.
-
-**Proteções:** sem `--yes-print` nenhum papel é enviado; sem `--escpos-raw --cut-after-each --yes-cut` nenhum comando de guilhotina é gerado; o lote é limitado a **100 comprovantes**. O resultado da fila é registrado como `INCONCLUSIVO` até conferência física.
-
-Modelo resumido de cada comprovante:
-
-```text
-OnSiteSuite
-Equipamento: Impressora
-Marca: [fabricante]
-Modelo: [modelo]
-Quantidade de impressões de teste: 5
-
-Impressão Número: 1
-
-Lorem ipsum dolor sit amet, consectetur...
-
-Desenvolvedor: Luís Gazola
-Empresa: Excelsior Soluções em Tecnologia
-----------------------------------------
-----------------------------------------
-[corte físico, apenas se compatível e autorizado]
-[próxima impressão numerada]
-```
-
-## Instalação no Windows
-
-**Alvo:** Windows 10/11 com **PowerShell 7.4.6**. Os scripts Windows ainda não foram executados em hardware real nesta entrega. Não presuma compatibilidade com Windows PowerShell 5.1.
-
-Após obter o ZIP de `v2.2.0`, você pode iniciar a mesma aplicação pelo **PowerShell 7** ou pelo **Prompt de Comando (CMD)**. O CMD funciona como interface; o motor de diagnóstico continua sendo o **PowerShell 7.4.6** (`pwsh.exe`) e deve estar instalado e disponível no PATH.
+Abra o terminal na pasta do projeto e confirme que `pwsh.exe` está disponível.
 
 **PowerShell 7:**
 
@@ -217,201 +171,155 @@ pwsh --version
 .\OnSiteSuite.ps1
 .\OnSiteSuite.ps1 -InfoOnly
 .\OnSiteSuite.ps1 -ListTests
-.\OnSiteSuite.ps1 -Tests 'system,cpu,memory,usb' -NonInteractive
+.\OnSiteSuite.ps1 -Tests 'system,cpu,memory,storage' -NonInteractive
+.\OnSiteSuite.ps1 -UsbMonitor -UsbTerminal PowerShell
 ```
 
-**CMD (`cmd.exe`):**
+**Prompt de Comando (CMD):**
 
 ```bat
 pwsh --version
 OnSiteSuite.cmd
 OnSiteSuite.cmd -InfoOnly
 OnSiteSuite.cmd -ListTests
-OnSiteSuite.cmd -Tests system,cpu,memory,usb -NonInteractive
-```
-
-O arquivo `OnSiteSuite.cmd` vem na raiz do projeto e chama `pwsh.exe -NoProfile -File OnSiteSuite.ps1`. Ele não depende de `powershell.exe` 5.1 nem modifica a política de execução do sistema. Se a política local bloquear o arquivo `.ps1`, siga a política de TI da organização; não é feita alteração automática de política.
-
-Para obter a versão via Git após publicação:
-
-```powershell
-git clone --branch v2.2.0 --depth 1 https://github.com/luisgazola/OnSiteSuite.git
-Set-Location .\OnSiteSuite
-.\OnSiteSuite.ps1
-```
-
-### USB Diagnostic Lab no Windows — v2.2.0
-
-Execute a análise USB com PowerShell 7, usando o motor de diagnóstico existente. Para comparar uma sessão atual com outra já salva:
-
-```powershell
-.\OnSiteSuite.ps1 -UsbMonitor -UsbTerminal PowerShell
-.\OnSiteSuite.ps1 -UsbMonitor -UsbTerminal CMD -UsbBaseline 'C:\Laudos\sessao-anterior\usb-resumo.json'
-```
-
-Os resultados adicionais são salvos junto aos três laudos tradicionais. O uso normal da v2.1.0 em Windows foi confirmado em campo pelo responsável, mas **as análises novas da v2.2.0 ainda exigem testes Windows próprios**. Para validar o serviço isoladamente:
-
-```powershell
-pwsh -NoProfile -File .\tests\run-windows.ps1
-```
-
-Consulte [notas da v2.2.0](docs/RELEASE_2.2.0.md) e [registro de validação](docs/VALIDATION_2.2.0.md).
-
-### Monitor USB em nova janela no Windows
-
-**PowerShell 7 como terminal secundário (padrão):**
-
-```powershell
-.\OnSiteSuite.ps1 -UsbMonitor
-.\OnSiteSuite.ps1 -UsbMonitor -UsbTerminal PowerShell
-```
-
-**CMD como terminal secundário, solicitado do PowerShell:**
-
-```powershell
-.\OnSiteSuite.ps1 -UsbMonitor -UsbTerminal CMD
-```
-
-**Dentro do próprio Prompt de Comando:**
-
-```bat
-OnSiteSuite.cmd -UsbMonitor
-OnSiteSuite.cmd -UsbMonitor -UsbTerminal PowerShell
 OnSiteSuite.cmd -UsbMonitor -UsbTerminal CMD
 ```
 
-Ao iniciar por `OnSiteSuite.cmd`, o modo `Auto` escolhe o CMD; com `OnSiteSuite.ps1`, escolhe o PowerShell. `-UsbTerminal` sempre tem prioridade sobre essa escolha. As duas opções geram os mesmos relatórios.
+O **CMD funciona como lançador**: o motor de diagnósticos continua sendo o PowerShell 7. A aplicação não modifica automaticamente políticas de execução nem solicita elevação de privilégios.
 
-A segunda janela observa a enumeração PnP USB. **Digite `\q` na janela de monitor** para finalizar e salvar os relatórios; no Windows não é necessário pressionar ENTER. Para medições com fim automático em ambiente de teste, utilize `-UsbSamples 10 -UsbInterval 1`.
+### Atalhos do menu
 
-### Sequência de impressão no Windows
+| Atalho | Ação |
+|---|---|
+| **Números** | Alternar os testes desejados. |
+| `a` | Selecionar todas as sondagens passivas. |
+| `r` | Executar a seleção. |
+| `u` | Iniciar monitoramento USB em outra janela. |
+| `p` | Abrir o assistente de testes de impressão. |
+| `q` | Sair do menu principal. |
 
-```powershell
-# Lote de três impressões; não envia corte.
-.\OnSiteSuite.ps1 -PrintQueue 'Minha Impressora' -PrintCount 3 -YesPrint
+Para consultar outras opções disponíveis, use `./onsite.sh --help` no Linux ou `Get-Help .\OnSiteSuite.ps1` no PowerShell.
 
-# Somente para fila e impressora compatíveis com RAW ESC/POS e guilhotina.
-.\OnSiteSuite.ps1 -PrintQueue 'Minha Impressora' -PrintCount 5 `
-  -PrintBrand 'Epson' -PrintModel 'TM-T20' `
-  -EscPosRaw -CutAfterEach -CutMode full -YesPrint -YesCut
+## Módulos e procedimentos especializados
+
+O OnSiteSuite foi planejado como uma suíte extensível. Alguns recursos exigem comandos próprios e dependências opcionais:
+
+- **Monitoramento e análise USB:** eventos de conexão/desconexão, contagem de reconexões, `usb-resumo.json` e comparação com sessões anteriores via `--usb-baseline` (Linux) ou `-UsbBaseline` (Windows).
+- **Testes de impressão:** lotes de comprovantes com quantidade configurável, mediante autorização; no Linux, requer fila de impressão CUPS para o envio convencional.
+- **Guilhotina ESC/POS:** opcional e restrita a dispositivos e filas compatíveis com RAW; requer confirmação específica do técnico. O aceite de um trabalho pela fila não garante corte ou impressão física.
+- **Troubleshooting por sintomas:** orientações e verificações que podem complementar o diagnóstico, sem executar reparos automaticamente.
+
+Exemplos de comandos especializados:
+
+```bash
+# Linux: comparar uma sessão USB com uma referência anterior
+./onsite.sh --usb-monitor --usb-baseline '/caminho/usb-resumo.json'
+
+# Linux: imprimir um único comprovante, sem comando de corte
+./onsite.sh --print-test NOME_DA_FILA --print-count 1 --yes-print
 ```
 
-O modo padrão utiliza o spooler Windows (`Out-Printer`). O modo RAW utiliza a API WinSpool, compila um pequeno adaptador C# localmente e entrega os comandos ESC/POS. **O driver, a fila e a impressora precisam aceitar dados RAW; nenhum resultado físico foi homologado nesta entrega.**
+```powershell
+# Windows: monitor com comparação de referência
+.\OnSiteSuite.ps1 -UsbMonitor -UsbBaseline 'C:\Laudos\usb-resumo.json'
 
-## Relatórios
+# Windows: enviar um comprovante para uma impressora configurada
+.\OnSiteSuite.ps1 -PrintQueue 'Minha Impressora' -PrintCount 1 -YesPrint
+```
 
-Cada sessão de diagnóstico gera os arquivos no diretório `Reports/AAAA/MM/DD/<sessão>/` (ou no diretório passado por `--output` / `-Output`):
+Para instruções detalhadas, parâmetros, cuidados de impressão e limites técnicos, consulte as [notas da v2.1.0](docs/RELEASE_2.1.0.md) e as [notas da v2.2.0](docs/RELEASE_2.2.0.md).
 
-| Arquivo | Conteúdo |
+## Relatórios e evidências
+
+Cada execução pode produzir relatórios locais em `Reports/AAAA/MM/DD/<sessão>/` ou no diretório de saída escolhido pelo operador.
+
+| Arquivo | Utilização |
 |---|---|
-| `relatorio.json` | Metadados, inventário, estados, horários, evidências e recomendações. |
-| `relatorio.txt` | Versão legível para chamados e registros rápidos. |
-| `relatorio.html` | Laudo local para navegador e impressão. |
-| `usb-eventos.jsonl` | **Apenas monitor USB:** registro completo de início, conexão, desconexão e encerramento com timestamp. |
-| `comprovante-impressao.txt` | **Apenas lote de impressão:** modelo numerado enviado ao spooler. |
+| `relatorio.json` | Registro estruturado para consulta, arquivamento e possíveis integrações. |
+| `relatorio.txt` | Resumo legível e fácil de anexar a um chamado. |
+| `relatorio.html` | Visualização do laudo em navegador local. |
+| `usb-eventos.jsonl` | Histórico de eventos quando o monitor USB é executado. |
+| `usb-resumo.json` | Estatísticas por dispositivo em sessões de diagnóstico USB. |
+| `usb-comparacao.json` | Diferenças observadas quando há uma sessão-base informada. |
+| `comprovante-impressao.txt` | Modelo de comprovante associado aos testes de impressão. |
 
-O contrato JSON permanece em **`schemaVersion: "2.0"`** para preservar a compatibilidade das integrações; a versão executável agora é **`2.2.0`**.
+O contrato principal permanece em **`schemaVersion: "2.0"`**, enquanto a versão do aplicativo é **2.2.0**. Os resultados usam estados padronizados: `OK`, `ATENCAO`, `FALHA`, `INCONCLUSIVO` e `NAO_SUPORTADO`.
 
-**Estados:** `OK`, `ATENCAO`, `FALHA`, `INCONCLUSIVO`, `NAO_SUPORTADO`. O resultado `INCONCLUSIVO` é adequado quando a fila aceita um job sem evidência de impressão física. Conexão/desconexão observada **não confirma** defeito de cabo, porta, controlador ou impressora.
+**Atenção à privacidade:** os laudos podem conter número de série, nomes de equipamentos, dados de rede e identificação de dispositivos. Revise o conteúdo antes de compartilhar e aplique as regras de proteção de dados da organização.
 
-**Abrir o HTML mais recente:**
+## Arquitetura e tecnologias
+
+O projeto adota **MVC adaptado à interface de terminal + Service Layer**, com separação entre coordenação, apresentação, regras de aplicação, contratos e acesso ao sistema operacional.
+
+```text
+OnSiteSuite
+├── Entradas: onsite.sh | OnSiteSuite.ps1 | OnSiteSuite.cmd
+├── Controllers / Views     → fluxo de sessão e interface
+├── Services                → diagnósticos, monitoramento, relatórios
+├── Domain                  → contratos, estados e validações
+├── Adapters                → Linux (/proc, /sys, CUPS) e Windows (CIM, WinSpool)
+├── config/                 → catálogo, fluxos orientativos, schema JSON
+├── tests/                  → regressão e testes de serviços/adaptadores
+└── docs/                   → arquitetura, evolução, segurança e releases
+```
+
+**Tecnologias principais:** PowerShell 7, Bash, JSON, ferramentas nativas dos sistemas operacionais e C# restrito ao adaptador RAW de impressão no Windows. A execução normal é local e não depende de uma API externa.
+
+A arquitetura foi concebida para permitir evolução por módulos e automação de testes, sem impor microserviços ou dependências desnecessárias. Veja [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+## Qualidade, status e limitações
+
+- **Linux:** testes de regressão automatizados, análises USB e impressão simulada executados no desenvolvimento da v2.2.0.
+- **Windows:** funcionamento prático da linha **2.1.0** confirmado pelo mantenedor; os módulos novos de análise USB da **2.2.0** precisam de validação própria em ambiente Windows.
+- **Equipamentos e periféricos:** resultados variam conforme permissões, firmware, drivers e suporte a protocolos. Impressão física e guilhotina não são consideradas homologadas apenas por testes simulados.
+- **Segurança operacional:** as coletas são predominantemente passivas. Rede externa e operações físicas, como impressão e corte, exigem opções explícitas.
+- **Escopo:** o OnSiteSuite não substitui equipamentos de medição, ferramentas oficiais de fabricantes, perícia ou certificação de hardware.
+
+Para verificar o código após baixá-lo:
 
 ```bash
 # Linux
-xdg-open "$(find Reports -type f -name relatorio.html | sort | tail -n 1)"
-```
-
-```powershell
-# Windows PowerShell 7
-Get-ChildItem .\Reports -Recurse -Filter relatorio.html |
-  Sort-Object LastWriteTime -Descending | Select-Object -First 1 |
-  ForEach-Object { Start-Process $_.FullName }
-```
-
-## Arquitetura
-
-A v2.2.0 preserva o **MVC + Service Layer** consolidado na v2.0.3 e adiciona componentes especializados:
-
-```text
-OnSiteSuite/
-├── onsite.sh / OnSiteSuite.ps1 / OnSiteSuite.cmd # entradas Linux, PowerShell e CMD
-├── VERSION / config/             # versão, catálogo e schema JSON 2.0
-├── src/
-│   ├── linux/
-│   │   ├── App/ Controllers/ Domain/ Views/
-│   │   ├── Services/              # Diagnostic, Report, UsbMonitor, Print
-│   │   └── Adapters/              # Probe, Equipment, USB, impressão, Terminal (kgx)
-│   └── windows/
-│       ├── App/ Controllers/ Domain/ Views/
-│       ├── Services/              # Diagnostic, Report, UsbMonitor, Print
-│       └── Adapters/              # CIM, USB, WinSpool RAW e Terminal (CMD/PowerShell)
-├── tests/                         # regressão Linux e testes Windows mockados
-├── docs/                          # decisões, segurança e roadmap
-├── scripts/publish-github.sh
-└── Reports/                       # relatórios locais (ignorados no Git)
-```
-
-Os **Controllers** administram a sessão; as **Views** apresentam menus e recebem confirmações; os **Services** executam os casos de uso; os **Adapters** interagem com sysfs/CUPS no Linux e CIM/WinSpool no Windows; o **Domain** padroniza os resultados. Os serviços de impressão não enviam papel sem autorização do técnico.
-
-Detalhes em [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) e no histórico da consolidação em [`docs/CLEANUP_2.0.3.md`](docs/CLEANUP_2.0.3.md).
-
-## Testes e qualidade
-
-```bash
-# Regressão Linux completa, inclusive USB e impressão simulados
 bash tests/run-linux.sh
 ```
 
-No Windows, quando houver PowerShell 7:
-
 ```powershell
-pwsh -NoProfile -File ./tests/architecture-windows.ps1
-pwsh -NoProfile -File ./tests/adapters-windows.ps1
-pwsh -NoProfile -File ./tests/advanced-windows.ps1
-pwsh -NoProfile -File ./tests/terminal-windows.ps1
+# Windows — PowerShell 7
+pwsh -NoProfile -File .\tests\run-windows.ps1
 ```
 
-O teste `terminal-windows.ps1` valida os argumentos preparados para CMD/PowerShell sem abrir janelas; a execução real no Windows permanece pendente. Os testes com fila CUPS simulada **não enviam papel real**. Os testes de WinSpool/RAW no Windows também dependem de validação em máquina real e impressora compatível.
+A execução e o resultado dos testes em sua máquina devem ser registrados separadamente dos resultados simulados. Consulte [validação da v2.2.0](docs/VALIDATION_2.2.0.md), [`CHANGELOG.md`](CHANGELOG.md) e [`SECURITY.md`](SECURITY.md).
 
-## Segurança e limitações
+## Evolução do projeto
 
-- **Consentimento explícito:** impressão requer `--yes-print`/`-YesPrint`; corte requer também modo RAW e `--yes-cut`/`-YesCut`.
-- **Privilégio mínimo:** monitor USB e diagnóstico não elevam permissões automaticamente. Não rode a suíte toda como `root`/Administrador apenas para forçar a leitura de um recurso.
-- **Offline por padrão:** sem telemetria ou rede externa automática. Sondagens externas de rede exigem `--online`/`-Online`.
-- **Privacidade:** identificadores PnP/USB, serial, hostname, cliente e logs podem ser sensíveis. Revise relatórios antes de compartilhar; a responsabilidade por retenção e LGPD é do operador.
-- **Terminais Windows:** CMD é um host de terminal para o motor `pwsh.exe` 7; não se afirma suporte a execução nativa dos scripts sob `cmd.exe` nem sob `powershell.exe` 5.1.
-- **Monitor USB por amostragem:** pode perder eventos rápidos entre leituras. Não mede estabilidade elétrica, sinal, velocidades ou integridade de cabo.
-- **ESC/POS varia entre fabricantes:** **não** assuma que todo modelo térmico ou toda fila de impressão suporta guilhotina. O comando `GS V` pode não funcionar ou produzir efeito diferente dependendo do firmware.
-- **Sem prova de impressão física:** aceitar o job no spooler não confirma papel, alinhamento, tinta, comunicação ou corte.
-- **Escopo:** ferramentas complementares de diagnóstico; não são certificação, correção automática ou auditoria de segurança completa.
+O desenvolvimento segue um roadmap incremental: melhoria dos diagnósticos, observabilidade de dispositivos, laboratório de periféricos, histórico e comparação de laudos, experiência de terminal, qualidade e distribuição. Uma interface gráfica e integrações opcionais com sistemas de atendimento são possibilidades futuras.
 
-Consulte [`SECURITY.md`](SECURITY.md) e [`docs/SECURITY.md`](docs/SECURITY.md). Use apenas em equipamentos sob sua responsabilidade ou com autorização.
+As funcionalidades planejadas **não devem ser confundidas com recursos já implementados**. Consulte [`docs/ROADMAP.md`](docs/ROADMAP.md) e as [issues do repositório](https://github.com/luisgazola/OnSiteSuite/issues).
 
-## Publicação no GitHub
+## Contribua com o projeto
 
-O projeto usa o histórico do repositório [luisgazola/OnSiteSuite](https://github.com/luisgazola/OnSiteSuite), renomeado do FieldServiceToolkit.
+O OnSiteSuite também é um espaço de colaboração e aprendizado em engenharia de software aplicada a problemas reais de TI.
 
-Para publicar a **v2.2.0** depois de revisar o código, configure autenticação Git e identidade do autor. Na pasta extraída, execute:
+São bem-vindas contribuições em compatibilidade de hardware, testes Windows/Linux, diagnósticos, acessibilidade, documentação, manutenção de adaptadores, novos fluxos de troubleshooting e revisão de segurança.
 
-```bash
-bash scripts/publish-github.sh
-```
+Para contribuir, abra uma [issue](https://github.com/luisgazola/OnSiteSuite/issues) com o cenário e os resultados observados, ou proponha alterações por pull request. Não publique números de série, identificadores de clientes, logs sensíveis ou credenciais. Leia [`CONTRIBUTING.md`](CONTRIBUTING.md), [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) e [`SECURITY.md`](SECURITY.md).
 
-O script executa os testes Linux, clona a branch `main` em nova pasta, aplica a nova versão e cria **uma nova tag `v2.2.0`**, sem sobrescrever as tags anteriores. A publicação exige permissão de escrita no GitHub.
+## Autoria, referências e licença
 
-## Contribuindo
+**OnSiteSuite** é um **projeto pessoal de Luís Fernando Gazola**, derivado e evoluído do FieldServiceToolkit. Faz parte do ecossistema de iniciativas da **Excelsior Soluções em Tecnologia**, preservando sua identidade autoral e sua operação independente.
 
-Contribuições em compatibilidade ESC/POS, drivers, simuladores, integração Windows, telemetria **local e opcional**, acessibilidade de terminal e cobertura de testes são bem-vindas. Abra uma issue sem dados pessoais, crie uma branch, rode os testes e envie um pull request com evidências e limitações. Veja [`CONTRIBUTING.md`](CONTRIBUTING.md) e [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
+- **Autor e mantenedor:** [Luís Fernando Gazola](https://github.com/luisgazola)
+- **Repositório oficial:** [luisgazola/OnSiteSuite](https://github.com/luisgazola/OnSiteSuite)
+- **Licença do código:** [MIT](LICENSE)
+- **Documentação técnica:** [`docs/`](docs/ARCHITECTURE.md), [`CHANGELOG.md`](CHANGELOG.md) e [`docs/ROADMAP.md`](docs/ROADMAP.md)
 
-## Referências e licença
-
-**Projeto:** OnSiteSuite · **Versão:** 2.2.0  
-**Empresa:** **Excelsior Soluções em Tecnologia**  
-**Desenvolvedor:** **Luís Gazola** · [@luisgazola](https://github.com/luisgazola)  
-**Código-fonte:** [github.com/luisgazola/OnSiteSuite](https://github.com/luisgazola/OnSiteSuite)
-
-Licença **[MIT](LICENSE)**. Projeto derivado e evoluído do FieldServiceToolkit com histórico Git preservado. A separação de camadas e a estratégia de testes seguem práticas consolidadas de arquitetura limpa, refatoração, TDD e programação pragmática. Para detalhes, consulte [`CHANGELOG.md`](CHANGELOG.md), [`docs/ROADMAP.md`](docs/ROADMAP.md) e [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+O projeto aplica princípios de código limpo, responsabilidade única, refatoração, testes de regressão e arquitetura em camadas. A documentação registra as decisões e limitações existentes; não implica certificação formal dos equipamentos diagnosticados.
 
 ---
 
-<div align="center">**OnSiteSuite v2.2.0 — Field Service orientado a evidências, integração simples e execução sob controle do técnico.**</div>
+<div align="center">
+
+**OnSiteSuite — Diagnósticos mais consistentes. Evidências mais claras. Suporte técnico mais eficiente.**
+
+*Desenvolvido por Luís Fernando Gazola · Ecossistema Excelsior Soluções em Tecnologia*
+
+</div>
